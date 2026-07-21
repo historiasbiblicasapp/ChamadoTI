@@ -5,6 +5,7 @@ import { ProtectedRoute } from './guards/ProtectedRoute';
 import { Toaster } from './components/ui/Toaster';
 import { Layout } from './components/layout/Layout';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { LoginPage } from './pages/auth/LoginPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
@@ -58,10 +59,11 @@ function HomeRedirect() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Toaster />
-      <CookieConsent />
-      <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Toaster />
+        <CookieConsent />
+        <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -104,7 +106,8 @@ export default function App() {
           <Route path="settings" element={<SuspenseWrapper><SettingsPage /></SuspenseWrapper>} />
           <Route path="audit" element={<SuspenseWrapper><AuditPage /></SuspenseWrapper>} />
         </Route>
-      </Routes>
-    </AuthProvider>
+        </Routes>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
