@@ -14,6 +14,8 @@ import { showToast } from '../../components/ui/Toaster';
 import { supabase } from '../../lib/supabase';
 import { api } from '../../services/api';
 import { createWhatsAppTicketLink } from '../../utils/whatsapp';
+import { ResolveTicketModal } from '../../components/tickets/ResolveTicketModal';
+import type { Profile } from '../../types';
 
 export function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +25,18 @@ export function TicketDetailPage() {
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [reopening, setReopening] = useState(false);
+  const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
+  const [isSubmittingResolve, setIsSubmittingResolve] = useState(false);
+  const [technicians, setTechnicians] = useState<Profile[]>([]);
   const [slaHoursMap, setSlaHoursMap] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    api.users.list().then((users) => {
+      const techs = users.filter((u) => u.role === 'admin' || u.role === 'analyst');
+      setTechnicians(techs.length > 0 ? techs : users);
+    }).catch(() => {});
+  }, []);
+
 
   const handleWhatsAppNotify = () => {
     if (!ticket) return;
@@ -99,7 +112,69 @@ export function TicketDetailPage() {
     }
   };
 
+  const handleAssignTechnician = async (techId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from('tickets').update({
+        assigned_to: techId || null,
+        updated_at: new Date().toISOString(),
+      }).eq('id', ticket.id);
+
+      const tech = technicians.find((t) => t.id === techId);
+      await supabase.from('ticket_history').insert({
+        ticket_id: ticket.id,
+        user_id: user?.id,
+        action: 'assigned',
+        old_value: ticket.assigned_to || null,
+        new_value: tech?.full_name || techId || 'Nenhum',
+      });
+
+      showToast('success', 'Analista Atribuído', tech ? `Chamado atribuído a ${tech.full_name}` : 'Atribuição removida');
+      refetch();
+    } catch {
+      showToast('error', 'Erro', 'Não foi possível atribuir o técnico.');
+    }
+  };
+
+  const handleConfirmResolve = async (data: { resolvedBy: string; solutionApplied: string; rootCause?: string }) => {
+    setIsSubmittingResolve(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      await supabase.from('tickets').update({
+        status: 'resolved',
+        resolved_at: new Date().toISOString(),
+        resolved_by: data.resolvedBy,
+        solution_applied: data.solutionApplied,
+        root_cause: data.rootCause || null,
+        updated_at: new Date().toISOString(),
+      }).eq('id', ticket.id);
+
+      await supabase.from('ticket_history').insert({
+        ticket_id: ticket.id,
+        user_id: user?.id,
+        action: 'status_changed',
+        old_value: ticket.status,
+        new_value: 'resolved',
+      });
+
+      showToast('success', 'Chamado Resolvido', 'O atendimento foi concluído e validado com sucesso.');
+      setIsResolveModalOpen(false);
+      refetch();
+    } catch {
+      showToast('error', 'Erro', 'Não foi possível concluir o chamado.');
+    } finally {
+      setIsSubmittingResolve(false);
+    }
+  };
+
   const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === 'resolved') {
+      setIsResolveModalOpen(true);
+      return;
+    }
+
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -116,10 +191,6 @@ export function TicketDetailPage() {
           status: newStatus,
           updated_at: new Date().toISOString(),
         };
-        if (newStatus === 'resolved') {
-          updates.resolved_at = new Date().toISOString();
-          updates.resolved_by = user?.id;
-        }
         await supabase.from('tickets').update(updates).eq('id', ticket.id);
       }
 
@@ -138,6 +209,8 @@ export function TicketDetailPage() {
       showToast('error', 'Erro', 'Nao foi possivel alterar o status');
     }
   };
+
+
 
   const handleAddComment = async (content: string, isInternal: boolean) => {
     try {
@@ -340,6 +413,30 @@ export function TicketDetailPage() {
         </div>
 
         <div className="space-y-6">
+          {/* Analista/Técnico Responsável */}
+          <div className="card">
+            <h3 className="text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+              <span>👤</span> Técnico Responsável
+            </h3>
+            <select
+              value={ticket.assigned_to || ''}
+              onChange={(e) => handleAssignTechnician(e.target.value)}
+              className="select text-sm w-full"
+            >
+              <option value="">— Sem atribuição —</option>
+              {technicians.map((tech) => (
+                <option key={tech.id} value={tech.id}>
+                  {tech.full_name} ({tech.role === 'admin' ? 'Admin' : 'Analista'})
+                </option>
+              ))}
+            </select>
+            {ticket.assignee && (
+              <p className="text-xs text-netvision-400 mt-1.5">
+                ✓ Atribuído a <strong>{ticket.assignee.full_name}</strong>
+              </p>
+            )}
+          </div>
+
           <div className="card">
             <h3 className="text-sm font-medium text-gray-400 mb-4">Informacoes</h3>
             <div className="space-y-3">
@@ -367,11 +464,27 @@ export function TicketDetailPage() {
                 <SLABar priority={ticket.priority} createdAt={ticket.created_at} status={ticket.status} slaHours={slaHoursMap[ticket.priority]} />
               </div>
               {(ticket.status === 'resolved' || ticket.status === 'closed') && (
-                <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <p className="text-xs text-green-400 font-medium">Resolvido por</p>
-                  <p className="text-sm text-gray-200">{(ticket as any).resolved_by_user?.full_name || 'Sistema'}</p>
+                <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 space-y-1">
+                  <p className="text-xs text-green-400 font-semibold flex items-center gap-1">
+                    <span>✅</span> Concluído e Validado por
+                  </p>
+                  <p className="text-sm font-medium text-gray-200">
+                    {(ticket as any).resolved_by_user?.full_name || 'Sistema'}
+                  </p>
                   {ticket.resolved_at && (
-                    <p className="text-xs text-gray-500 mt-0.5">{formatDate(ticket.resolved_at)}</p>
+                    <p className="text-xs text-gray-500">{formatDate(ticket.resolved_at)}</p>
+                  )}
+                  {ticket.solution_applied && (
+                    <div className="mt-2 pt-2 border-t border-green-500/20">
+                      <p className="text-xs text-green-400 font-medium">Solução Aplicada:</p>
+                      <p className="text-xs text-gray-300 mt-0.5">{ticket.solution_applied}</p>
+                    </div>
+                  )}
+                  {ticket.root_cause && (
+                    <div className="mt-1">
+                      <p className="text-xs text-orange-400 font-medium">Causa Raiz:</p>
+                      <p className="text-xs text-gray-300 mt-0.5">{ticket.root_cause}</p>
+                    </div>
                   )}
                 </div>
               )}
@@ -455,14 +568,16 @@ export function TicketDetailPage() {
             </div>
           )}
 
-          {ticket.solution_applied && (
-            <div className="card">
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Solucao Aplicada</h3>
-              <p className="text-sm text-gray-300">{ticket.solution_applied}</p>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Modal de Validação e Conclusão do Atendimento */}
+      <ResolveTicketModal
+        isOpen={isResolveModalOpen}
+        onClose={() => setIsResolveModalOpen(false)}
+        onConfirm={handleConfirmResolve}
+        isLoading={isSubmittingResolve}
+      />
     </div>
   );
 }

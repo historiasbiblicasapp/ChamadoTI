@@ -197,7 +197,7 @@ export function TicketList() {
                 <th className="table-header">Numero</th>
                 <th className="table-header">Titulo</th>
                 <th className="table-header">Solicitante</th>
-                <th className="table-header">Categoria</th>
+                <th className="table-header">Analista</th>
                 <th className="table-header">Prioridade</th>
                 <th className="table-header">Status</th>
                 <th className="table-header">SLA</th>
@@ -244,8 +244,14 @@ export function TicketList() {
                     <td className="table-cell text-sm text-gray-300 cursor-pointer" onClick={() => navigate(`/tickets/${ticket.id}`)}>
                       {ticket.requester?.full_name || '-'}
                     </td>
-                    <td className="table-cell text-sm text-gray-400 cursor-pointer" onClick={() => navigate(`/tickets/${ticket.id}`)}>
-                      {ticket.category?.name || '-'}
+                    <td className="table-cell cursor-pointer" onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                      {ticket.assignee ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-netvision-400">
+                          <span>👤</span> {ticket.assignee.full_name}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-600 italic">Sem analista</span>
+                      )}
                     </td>
                     <td className="table-cell cursor-pointer" onClick={() => navigate(`/tickets/${ticket.id}`)}>
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
@@ -316,6 +322,13 @@ export function TicketList() {
                 <p className="text-xs text-gray-400 mt-1">
                   Solicitante: <span className="text-gray-300">{ticket.requester?.full_name || '-'}</span>
                 </p>
+                {ticket.assignee ? (
+                  <p className="text-xs text-netvision-400 mt-0.5 flex items-center gap-1">
+                    <span>👤</span> Analista: <span className="font-medium">{ticket.assignee.full_name}</span>
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-600 italic mt-0.5">Sem analista atribuído</p>
+                )}
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-gray-800/80 text-xs">
