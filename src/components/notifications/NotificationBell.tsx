@@ -1,14 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Check, CheckCheck, Trash2, X, Loader2 } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, X, BellRing } from 'lucide-react';
 import { useNotifications } from '../../hooks/useNotifications';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
 import { formatDate } from '../../utils/formatters';
 
 export function NotificationBell() {
   const navigate = useNavigate();
   const { notifications, unreadCount, newCount, clearNewCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const { permission, requestPermission } = usePushNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,6 +86,22 @@ export function NotificationBell() {
               </button>
             </div>
           </div>
+
+          {permission === 'default' && (
+            <div className="p-3 bg-netvision-600/10 border-b border-netvision-500/20 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs text-gray-300">
+                <BellRing className="w-4 h-4 text-netvision-400 shrink-0" />
+                <span>Receber alertas nativos de chamados?</span>
+              </div>
+              <button
+                onClick={() => requestPermission()}
+                className="px-2.5 py-1 bg-netvision-600 hover:bg-netvision-500 text-white text-xs font-semibold rounded transition-all shrink-0"
+              >
+                Ativar
+              </button>
+            </div>
+          )}
+
 
           <div className="max-h-[400px] overflow-y-auto">
             {notifications.length === 0 ? (

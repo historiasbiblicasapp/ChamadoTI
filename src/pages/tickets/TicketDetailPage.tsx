@@ -13,6 +13,7 @@ import type { CustomFieldDef } from '../../components/tickets/TicketForm';
 import { showToast } from '../../components/ui/Toaster';
 import { supabase } from '../../lib/supabase';
 import { api } from '../../services/api';
+import { createWhatsAppTicketLink } from '../../utils/whatsapp';
 
 export function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,13 +25,25 @@ export function TicketDetailPage() {
   const [reopening, setReopening] = useState(false);
   const [slaHoursMap, setSlaHoursMap] = useState<Record<string, number>>({});
 
+  const handleWhatsAppNotify = () => {
+    if (!ticket) return;
+    const link = createWhatsAppTicketLink({
+      phone: (ticket as any).phone || ticket.requester?.phone || '',
+      ticketNumber: ticket.ticket_number,
+      title: ticket.title,
+      statusLabel: STATUSES[ticket.status as keyof typeof STATUSES]?.label || ticket.status,
+    });
+    window.open(link, '_blank');
+  };
+
   useEffect(() => {
-    api.sla.list().then((rules) => {
+    api.sla.list().then((rules: any[]) => {
       const map: Record<string, number> = {};
       rules.forEach((r) => { map[r.priority] = r.hours; });
       setSlaHoursMap(map);
     }).catch(() => {});
   }, []);
+
 
   if (isLoading) {
     return (
@@ -215,7 +228,14 @@ export function TicketDetailPage() {
           </div>
           <p className="text-sm text-gray-500 mt-1">{ticket.title}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleWhatsAppNotify}
+            className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-all shadow-md"
+            title="Enviar mensagem sobre o chamado no WhatsApp"
+          >
+            <span>💬 WhatsApp</span>
+          </button>
           <button
             onClick={() => setEditing(true)}
             className="btn-secondary flex items-center gap-2"
@@ -231,6 +251,7 @@ export function TicketDetailPage() {
             Excluir
           </button>
         </div>
+
       </div>
 
       {deleting && (

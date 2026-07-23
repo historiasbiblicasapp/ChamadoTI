@@ -1,8 +1,12 @@
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2, Send, Save, Trash2 } from 'lucide-react';
 import { TICKET_CATEGORIES, PRIORITIES } from '../../utils/constants';
+import { CameraAttachment } from '../ui/CameraAttachment';
+import { useOfflineDraft } from '../../hooks/useOfflineDraft';
+import { showToast } from '../ui/Toaster';
 
 export interface CustomFieldDef {
   name: string;
@@ -25,7 +29,7 @@ const ticketSchema = z.object({
 type TicketFormData = z.infer<typeof ticketSchema>;
 
 interface TicketFormProps {
-  onSubmit: (data: TicketFormData) => Promise<void>;
+  onSubmit: (data: TicketFormData & { files?: File[] }) => Promise<void>;
   isLoading?: boolean;
   defaultValues?: Partial<TicketFormData>;
   submitLabel?: string;
@@ -34,21 +38,37 @@ interface TicketFormProps {
 }
 
 export function TicketForm({ onSubmit, isLoading, defaultValues, submitLabel, customFieldDefs, customFieldValues }: TicketFormProps) {
+  const { saveDraft, getSavedDraft, clearDraft, hasDraft } = useOfflineDraft<TicketFormData>('new_ticket');
+  const savedDraft = getSavedDraft();
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [isDraftLoaded, setIsDraftLoaded] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<TicketFormData>({
     resolver: zodResolver(ticketSchema),
     defaultValues: {
       priority: 'medium',
       scheduled_date: new Date().toISOString().split('T')[0],
       custom_fields: customFieldValues || {},
+      ...savedDraft,
       ...defaultValues,
     },
   });
+
+  const watchAllFields = watch();
+
+  // Auto save draft to LocalStorage when user changes fields
+  useEffect(() => {
+    if (watchAllFields.title || watchAllFields.description) {
+      saveDraft(watchAllFields);
+    }
+  }, [watchAllFields.title, watchAllFields.description, watchAllFields.category_id, watchAllFields.priority, watchAllFields.location]);
 
   const customFields = watch('custom_fields') || {};
 
@@ -57,8 +77,48 @@ export function TicketForm({ onSubmit, isLoading, defaultValues, submitLabel, cu
     setValue('custom_fields', { ...current, [name]: value }, { shouldValidate: false });
   };
 
+  const handleFormSubmit = async (data: TicketFormData) => {
+    try {
+      await onSubmit({ ...data, files: attachedFiles });
+      clearDraft();
+    } catch (e) {
+      // Form submission error handled by parent
+    }
+  };
+
+  const handleClearDraft = () => {
+    clearDraft();
+    reset({
+      title: '',
+      description: '',
+      location: '',
+      category_id: '',
+      priority: 'medium',
+      scheduled_date: new Date().toISOString().split('T')[0],
+    });
+    setAttachedFiles([]);
+    showToast('info', 'Rascunho descartado', 'O formulário foi limpo.');
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {hasDraft() ? (
+        <div className="p-3 bg-netvision-600/10 border border-netvision-500/20 rounded-xl flex items-center justify-between text-xs text-netvision-400">
+          <div className="flex items-center gap-2">
+            <Save className="w-4 h-4" />
+            <span>Rascunho salvo automaticamente no dispositivo.</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleClearDraft}
+            className="text-red-400 hover:text-red-300 font-medium flex items-center gap-1"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Descartar Rascunho
+          </button>
+        </div>
+      ) : null}
+
       <div>
         <label className="block text-sm font-medium text-gray-400 mb-1.5">Data do Chamado</label>
         <input
@@ -98,13 +158,13 @@ export function TicketForm({ onSubmit, isLoading, defaultValues, submitLabel, cu
           <textarea
             {...register('description')}
             className="input resize-none h-32"
-            placeholder="Descreva como resolveu o problema..."
+            placeholder="Descreva detalhadamente a solicitacao ou problema..."
             disabled={isLoading}
           />
           {errors.description && <p className="text-xs text-red-400 mt-1">{errors.description.message}</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-4 max-w-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1.5">Categoria *</label>
             <select {...register('category_id')} className="select" disabled={isLoading}>
@@ -125,6 +185,12 @@ export function TicketForm({ onSubmit, isLoading, defaultValues, submitLabel, cu
             </select>
             {errors.priority && <p className="text-xs text-red-400 mt-1">{errors.priority.message}</p>}
           </div>
+        </div>
+
+        {/* Camera / File Attachment Section */}
+        <div className="border-t border-gray-800 pt-4">
+          <label className="block text-sm font-medium text-gray-400 mb-2">Anexos e Fotos da Câmera</label>
+          <CameraAttachment files={attachedFiles} onFilesChange={setAttachedFiles} disabled={isLoading} />
         </div>
       </div>
 
@@ -200,3 +266,4 @@ export function TicketForm({ onSubmit, isLoading, defaultValues, submitLabel, cu
     </form>
   );
 }
+

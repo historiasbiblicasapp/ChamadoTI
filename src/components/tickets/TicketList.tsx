@@ -182,7 +182,8 @@ export function TicketList() {
         </div>
       )}
 
-      <div className="card !p-0 overflow-hidden">
+      {/* Table view for Desktop */}
+      <div className="hidden md:block card !p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -275,6 +276,67 @@ export function TicketList() {
           </table>
         </div>
       </div>
+
+      {/* Cards View for Mobile Devices */}
+      <div className="block md:hidden space-y-3">
+        {isLoading ? (
+          <div className="card text-center py-8 text-gray-500">Carregando chamados...</div>
+        ) : paginatedTickets.length === 0 ? (
+          <div className="card text-center py-8 text-gray-500">Nenhum chamado encontrado</div>
+        ) : (
+          paginatedTickets.map((ticket) => (
+            <div
+              key={ticket.id}
+              onClick={() => navigate(`/tickets/${ticket.id}`)}
+              className={`card p-4 space-y-3 cursor-pointer hover:border-netvision-500/50 transition-all ${
+                selectedIds.includes(ticket.id) ? 'border-netvision-500/50 bg-netvision-500/5' : ''
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleSelect(ticket.id); }}
+                    className="text-gray-500 hover:text-gray-300"
+                  >
+                    {selectedIds.includes(ticket.id) ? <CheckSquare className="w-4 h-4 text-netvision-400" /> : <Square className="w-4 h-4" />}
+                  </button>
+                  <span className="font-mono text-xs font-bold text-netvision-400">
+                    {formatTicketNumber(ticket.ticket_number)}
+                  </span>
+                </div>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                  STATUSES[ticket.status]?.bgColor || ''
+                } ${STATUSES[ticket.status]?.color || ''}`}>
+                  {STATUSES[ticket.status]?.label || ticket.status}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-100 line-clamp-2">{ticket.title}</h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  Solicitante: <span className="text-gray-300">{ticket.requester?.full_name || '-'}</span>
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-gray-800/80 text-xs">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                  PRIORITIES[ticket.priority]?.bgColor || ''
+                } ${PRIORITIES[ticket.priority]?.color || ''} ${PRIORITIES[ticket.priority]?.borderColor || ''}`}>
+                  {PRIORITIES[ticket.priority]?.label || ticket.priority}
+                </span>
+                <SLAIndicator
+                  priority={ticket.priority}
+                  createdAt={ticket.created_at}
+                  status={ticket.status}
+                  slaHours={slaHoursMap[ticket.priority]}
+                />
+                <span className="text-gray-500">{ticket.scheduled_date || formatDate(ticket.created_at)}</span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between">

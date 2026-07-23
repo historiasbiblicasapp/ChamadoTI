@@ -30,6 +30,7 @@ const AuditPage = lazy(() => import('./pages/audit/AuditPage').then(m => ({ defa
 const PublicTicketPage = lazy(() => import('./pages/portal/PublicTicketPage').then(m => ({ default: m.PublicTicketPage })));
 const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 import { CookieConsent } from './components/ui/CookieConsent';
+import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -63,6 +64,7 @@ export default function App() {
       <AuthProvider>
         <Toaster />
         <CookieConsent />
+        <PWAInstallPrompt />
         <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

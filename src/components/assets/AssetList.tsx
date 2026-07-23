@@ -91,7 +91,8 @@ export function AssetList({ assets, isLoading }: AssetListProps) {
         <span className="text-xs text-gray-500 ml-2">{filtered.length} ativo(s)</span>
       </div>
 
-      <div className="card !p-0 overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden md:block card !p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -151,6 +152,49 @@ export function AssetList({ assets, isLoading }: AssetListProps) {
           </table>
         </div>
       </div>
+
+      {/* Mobile Cards View */}
+      <div className="block md:hidden space-y-3">
+        {isLoading ? (
+          <div className="card text-center py-8 text-gray-500">Carregando...</div>
+        ) : paginated.length === 0 ? (
+          <div className="card text-center py-8 text-gray-500">Nenhum ativo encontrado</div>
+        ) : (
+          paginated.map((asset) => {
+            const statusCfg = getStatusConfig(asset.status);
+            return (
+              <div
+                key={asset.id}
+                onClick={() => navigate(`/assets/${asset.id}`)}
+                className="card p-4 space-y-3 cursor-pointer hover:border-netvision-500/50 transition-all"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-bold text-netvision-400">
+                    Patrimônio: {asset.patrimony || '-'}
+                  </span>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusCfg?.bgColor || ''} ${statusCfg?.color || ''}`}>
+                    {statusCfg?.label || asset.status}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Monitor className="w-5 h-5 text-netvision-400 shrink-0" />
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-100">{asset.name}</h3>
+                    <p className="text-xs text-gray-400">{getTypeLabel(asset.type)}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-gray-800/80 text-xs text-gray-400">
+                  <span>Marca: {asset.brand || '-'}</span>
+                  <span>IP: {asset.ip_address || '-'}</span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
