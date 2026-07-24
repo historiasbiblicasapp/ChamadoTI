@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
