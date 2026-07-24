@@ -27,11 +27,9 @@ export function ResolveTicketModal({ isOpen, onClose, onConfirm, isLoading }: Re
       try {
         const currentUser = (await supabase.auth.getUser()).data.user;
         const allUsers = await api.users.list();
-        // Filter analysts and admins
         const techList = allUsers.filter((u) => u.role === 'admin' || u.role === 'analyst');
         setTechnicians(techList.length > 0 ? techList : allUsers);
 
-        // Pre-select logged in user if technician
         if (currentUser) {
           const isTech = techList.some((t) => t.id === currentUser.id);
           setSelectedTechId(isTech ? currentUser.id : techList[0]?.id || currentUser.id);
@@ -39,13 +37,21 @@ export function ResolveTicketModal({ isOpen, onClose, onConfirm, isLoading }: Re
           setSelectedTechId(techList[0].id);
         }
       } catch (e) {
-        // Fallback
       } finally {
         setLoadingTechs(false);
       }
     }
 
     loadData();
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;

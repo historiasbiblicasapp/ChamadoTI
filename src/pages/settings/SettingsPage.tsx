@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Settings, Save, Loader2, Clock, Shield, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Settings, Save, Loader2, Clock, Shield, AlertTriangle, Copy, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
@@ -11,6 +11,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
+  const publicTicketUrl = typeof window !== 'undefined' ? `${window.location.origin}/abrir-chamado` : '/abrir-chamado';
 
   const { data: slaRules, isLoading: slaLoading } = useQuery<SLARule[]>({
     queryKey: ['sla-rules'],
@@ -117,6 +118,38 @@ export function SettingsPage() {
               <button onClick={handleSaveSla} disabled={isSaving} className="btn-primary btn-sm flex items-center gap-1.5">
                 {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 Salvar SLA
+              </button>
+            </div>
+          </div>
+
+          {/* Public Ticket Link */}
+          <div className="card">
+            <h3 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2">
+              <ExternalLink className="w-4 h-4" />
+              Link para Abertura de Chamados
+            </h3>
+            <p className="text-xs text-gray-500 mb-3">
+              Compartilhe este link com quem precisa abrir um chamado sem precisar acessar o sistema.
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                readOnly
+                value={publicTicketUrl}
+                className="input !py-1.5 text-sm flex-1"
+              />
+              <button
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(publicTicketUrl);
+                    showToast('success', 'Link copiado', 'O link foi copiado para a area de transferencia');
+                  } catch {
+                    showToast('error', 'Erro', 'Nao foi possivel copiar o link');
+                  }
+                }}
+                className="btn-primary btn-sm flex items-center gap-1.5"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                Copiar
               </button>
             </div>
           </div>
