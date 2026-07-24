@@ -78,9 +78,9 @@ export function PublicTicketPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-start p-4">
         <ThemeToggle />
-        <div className="w-full max-w-md text-center">
+        <div className="w-full max-w-md text-center pt-8">
           <div className="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-green-400" />
           </div>
@@ -107,9 +107,9 @@ export function PublicTicketPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-start p-4">
       <ThemeToggle />
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-lg pt-8">
         <div className="text-center mb-8">
           <img src="/logo.jpeg" alt="Logo" className="w-16 h-16 rounded-2xl object-cover mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-100">ChamadosTiRaitz</h1>
