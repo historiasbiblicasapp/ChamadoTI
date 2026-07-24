@@ -14,15 +14,6 @@ export function ThemeToggle() {
 
   const current = options.find((o) => o.value === theme) || options[2];
 
-  useEffect(() => {
-    if (!showMenu) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [showMenu]);
-
   return (
     <div className="fixed top-4 right-4 z-50">
       <button

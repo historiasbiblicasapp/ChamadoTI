@@ -45,7 +45,6 @@
 
   body {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    overflow: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: rgb(var(--tw-gray-950));
