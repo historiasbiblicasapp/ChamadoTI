@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "import-historical": "node scripts/import-historical-tickets.cjs",
-    "create-admin": "node scripts/create-admin-user.cjs"
+    "create-admin": "node scripts/create-admin-user.cjs",
+    "create-users": "node scripts/create-users.cjs"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -5,7 +5,7 @@
 -- INSTRUCOES:
 -- 1. Execute migration.sql PRIMEIRO
 -- 2. Copie o UUID do seu usuario admin no Supabase
--- 3. Use Ctrl+H para substituir 8b83f559-18cb-4a9c-80f4-58bf3a39cc83 em TODOS os arquivos
+-- 3. Use Ctrl+H para substituir 736d8f34-dfa4-4e27-9f76-0a0e837ef534 em TODOS os arquivos
 -- 4. Execute em ordem: 01-setup, 02-tickets-*, 03-finalize
 
 -- Categories

@@ -209,7 +209,7 @@ function escapeSql(str) {
 }
 
 function generateSQL(tickets) {
-  const ADMIN_UUID_PLACEHOLDER = 'PASTE_YOUR_ADMIN_UUID_HERE';
+  const ADMIN_UUID = '736d8f34-dfa4-4e27-9f76-0a0e837ef534';
   const files = [];
 
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -275,7 +275,7 @@ function generateSQL(tickets) {
       const dateStr = resolvedDate ? `${resolvedDate}T12:00:00+00:00` : new Date().toISOString();
 
       lines.push(`INSERT INTO tickets (requester_id, title, description, status, priority, category_id, subcategory, assigned_to, department_id, location, phone, asset_id, created_at, resolved_at, closed_at, updated_at) SELECT`);
-      lines.push(`  '${ADMIN_UUID_PLACEHOLDER}', ${escapeSql(title)}, ${escapeSql(description)}, 'closed', 'medium', (SELECT id FROM ticket_categories WHERE name = ${escapeSql(cat.name)} LIMIT 1), ${escapeSql(ticket.lastName)}, '${ADMIN_UUID_PLACEHOLDER}', (SELECT id FROM departments WHERE name = ${escapeSql(department)} LIMIT 1), ${escapeSql(location)}, NULL, NULL, '${dateStr}', '${dateStr}', '${dateStr}', '${dateStr}'`);
+      lines.push(`  '${ADMIN_UUID}', ${escapeSql(title)}, ${escapeSql(description)}, 'closed', 'medium', (SELECT id FROM ticket_categories WHERE name = ${escapeSql(cat.name)} LIMIT 1), ${escapeSql(ticket.lastName)}, '${ADMIN_UUID}', (SELECT id FROM departments WHERE name = ${escapeSql(department)} LIMIT 1), ${escapeSql(location)}, NULL, NULL, '${dateStr}', '${dateStr}', '${dateStr}', '${dateStr}'`);
       lines.push(`WHERE NOT EXISTS (SELECT 1 FROM tickets WHERE title = ${escapeSql(title)});`);
       lines.push('');
     }
@@ -345,9 +345,7 @@ function main() {
 
   console.log(`\nSQL files generated in: ${OUTPUT_DIR}`);
   console.log('\n=== Next Steps ===');
-  console.log('1. Copie o UUID do seu usuario admin');
-  console.log('2. Substitua PASTE_YOUR_ADMIN_UUID_HERE em todos os arquivos');
-  console.log('3. Execute em ordem: 01-setup, 02-tickets-*, 03-finalize');
+  console.log('Execute em ordem no Supabase SQL Editor: 01-setup, 02-tickets-*, 03-finalize');
 }
 
 main();
