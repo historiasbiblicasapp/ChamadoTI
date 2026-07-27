@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Send, LogOut, Clock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,9 +18,10 @@ const STATUS_ICONS: Record<string, typeof CheckCircle> = {
 };
 
 export function UserPortal() {
+  const queryClient = useQueryClient();
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
-  const { tickets, isLoading: ticketsLoading, createTicket } = useTickets();
+  const { tickets, isLoading: ticketsLoading, error, createTicket } = useTickets();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -195,6 +197,16 @@ export function UserPortal() {
             <div className="text-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-netvision-400 mx-auto" />
               <p className="text-sm text-gray-500 mt-2">Carregando...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-red-400">Erro ao carregar chamados: {error.message}</p>
+              <button
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['tickets'] })}
+                className="mt-2 text-xs bg-red-500/20 hover:bg-red-500/30 px-3 py-1.5 rounded text-red-300"
+              >
+                Tentar novamente
+              </button>
             </div>
           ) : myTickets.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-8">Voce ainda nao tem chamados</p>

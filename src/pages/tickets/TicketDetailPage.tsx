@@ -82,17 +82,24 @@ export function TicketDetailPage() {
       const cat = TICKET_CATEGORIES.find((c) => c.value === data.category_id);
       const catId = cat ? (await supabase.from('ticket_categories').select('id').eq('name', cat.label).single()).data?.id : data.category_id;
 
+      const updates: any = {
+        title: data.title,
+        description: data.description,
+        category_id: catId || data.category_id,
+        priority: data.priority,
+        location: data.location,
+      };
+
+      if (data.scheduled_date !== undefined) {
+        updates.scheduled_date = data.scheduled_date || null;
+      }
+      if (data.custom_fields !== undefined) {
+        updates.custom_fields = data.custom_fields || null;
+      }
+
       await updateTicket.mutateAsync({
         id: ticket.id,
-        updates: {
-          title: data.title,
-          description: data.description,
-          category_id: catId || data.category_id,
-          priority: data.priority,
-          scheduled_date: data.scheduled_date || null,
-          location: data.location,
-          custom_fields: data.custom_fields || null,
-        },
+        updates,
       });
       showToast('success', 'Chamado atualizado', 'Alteracoes salvas com sucesso');
       setEditing(false);
@@ -136,17 +143,18 @@ export function TicketDetailPage() {
     }
   };
 
-  const handleConfirmResolve = async (data: { resolvedBy: string; solutionApplied: string; rootCause?: string }) => {
+  const handleConfirmResolve = async (resolveData: { resolvedBy: string; solutionApplied: string; rootCause?: string }) => {
     setIsSubmittingResolve(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData?.user;
 
       await supabase.from('tickets').update({
         status: 'resolved',
         resolved_at: new Date().toISOString(),
-        resolved_by: data.resolvedBy,
-        solution_applied: data.solutionApplied,
-        root_cause: data.rootCause || null,
+        resolved_by: resolveData.resolvedBy,
+        solution_applied: resolveData.solutionApplied,
+        root_cause: resolveData.rootCause || null,
         updated_at: new Date().toISOString(),
       }).eq('id', ticket.id);
 
@@ -161,8 +169,8 @@ export function TicketDetailPage() {
       showToast('success', 'Chamado Resolvido', 'O atendimento foi concluído e validado com sucesso.');
       setIsResolveModalOpen(false);
       refetch();
-    } catch {
-      showToast('error', 'Erro', 'Não foi possível concluir o chamado.');
+    } catch (error: any) {
+      showToast('error', 'Erro', error?.message || 'Não foi possível concluir o chamado.');
     } finally {
       setIsSubmittingResolve(false);
     }

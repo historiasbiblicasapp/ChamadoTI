@@ -7,9 +7,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY');
 }
 
-console.log('[Supabase] URL:', supabaseUrl);
-console.log('[Supabase] Anon prefix:', supabaseAnonKey.slice(0, 12), '...');
-
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export type Database = {

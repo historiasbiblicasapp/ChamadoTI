@@ -63,7 +63,6 @@ export const api = {
           *,
           requester:profiles!tickets_requester_id_fkey(full_name, role, phone),
           assignee:profiles!tickets_assigned_to_fkey(full_name),
-          resolved_by_user:profiles!tickets_resolved_by_fkey(full_name),
           category:ticket_categories(name, icon),
           department:departments(name),
           asset:assets(name, patrimony, type, brand, model),
@@ -72,7 +71,7 @@ export const api = {
           history:ticket_history(*, user:profiles(full_name))
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
       if (error) throw error;
       return data as Ticket;
     },

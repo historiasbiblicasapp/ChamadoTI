@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Filter, ChevronLeft, ChevronRight, CheckSquare, Square, Loader2 } from 'lucide-react';
 import { useTickets } from '../../hooks/useTickets';
@@ -13,6 +14,7 @@ import type { TicketStatus, TicketPriority } from '../../types';
 const ITEMS_PER_PAGE = 15;
 
 export function TicketList() {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -21,7 +23,7 @@ export function TicketList() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batchStatus, setBatchStatus] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
-  const { tickets, isLoading } = useTickets();
+  const { tickets, isLoading, error } = useTickets();
   const [slaHoursMap, setSlaHoursMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -184,6 +186,19 @@ export function TicketList() {
 
       {/* Table view for Desktop */}
       <div className="hidden md:block card !p-0 overflow-hidden">
+        {error && (
+          <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <div className="flex items-center justify-between">
+              <span>Erro ao carregar chamados: {error.message}</span>
+              <button
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['tickets'] })}
+                className="text-xs bg-red-500/20 hover:bg-red-500/30 px-2 py-1 rounded"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -285,6 +300,19 @@ export function TicketList() {
 
       {/* Cards View for Mobile Devices */}
       <div className="block md:hidden space-y-3">
+        {error && (
+          <div className="card bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-4">
+            <div className="flex items-center justify-between">
+              <span>Erro ao carregar chamados: {error.message}</span>
+              <button
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['tickets'] })}
+                className="text-xs bg-red-500/20 hover:bg-red-500/30 px-2 py-1 rounded"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          </div>
+        )}
         {isLoading ? (
           <div className="card text-center py-8 text-gray-500">Carregando chamados...</div>
         ) : paginatedTickets.length === 0 ? (
