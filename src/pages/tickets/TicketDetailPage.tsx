@@ -450,7 +450,7 @@ export function TicketDetailPage() {
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-500">Data do Chamado</p>
-                <p className="text-sm text-gray-200">{ticket.scheduled_date || formatDate(ticket.created_at)}</p>
+                  <p className="text-sm text-gray-200">{ticket.scheduled_date ? formatDate(ticket.scheduled_date) : formatDate(ticket.created_at)}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Solicitante</p>

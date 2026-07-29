@@ -20,7 +20,10 @@ export function formatDuration(seconds: number): string {
 export function formatDate(dateStr: string): string {
   if (!dateStr) return '-';
   const date = new Date(dateStr);
-  return date.toLocaleString('pt-BR');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 export function formatTime(dateStr: string): string {
@@ -48,7 +51,7 @@ export function timeAgo(dateStr: string): string {
 }
 
 export function formatTicketNumber(number: number): string {
-  return `CH-${String(number).padStart(6, '0')}`;
+  return String(number).padStart(6, '0');
 }
 
 export function calculateSLARemaining(createdAt: string, priorityHours: number): {

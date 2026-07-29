@@ -246,7 +246,7 @@ export function TicketList() {
                       </button>
                     </td>
                     <td className="table-cell text-xs text-gray-500" onClick={() => navigate(`/tickets/${ticket.id}`)}>
-                      {ticket.scheduled_date || formatDate(ticket.created_at)}
+                      {ticket.scheduled_date ? formatDate(ticket.scheduled_date) : formatDate(ticket.created_at)}
                     </td>
                     <td className="table-cell">
                       <span className="font-mono text-sm font-medium text-netvision-400">
@@ -371,7 +371,7 @@ export function TicketList() {
                   status={ticket.status}
                   slaHours={slaHoursMap[ticket.priority]}
                 />
-                <span className="text-gray-500">{ticket.scheduled_date || formatDate(ticket.created_at)}</span>
+                <span className="text-gray-500">{ticket.scheduled_date ? formatDate(ticket.scheduled_date) : formatDate(ticket.created_at)}</span>
               </div>
             </div>
           ))
