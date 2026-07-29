@@ -117,13 +117,6 @@ export function Dashboard() {
           color="text-green-400"
           loading={statsLoading}
         />
-        <StatCard
-          title="Fechados"
-          value={stats?.closed || 0}
-          icon={Users}
-          color="text-gray-400"
-          loading={statsLoading}
-        />
       </div>
 
       {/* Quick Stats */}

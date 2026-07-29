@@ -14,7 +14,6 @@ const STATUS_ICONS: Record<string, typeof CheckCircle> = {
   open: AlertCircle,
   in_progress: Clock,
   resolved: CheckCircle,
-  closed: XCircle,
 };
 
 export function UserPortal() {
@@ -221,7 +220,7 @@ export function UserPortal() {
                     className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/30 hover:bg-gray-800/60 cursor-pointer transition-colors"
                   >
                     <StatusIcon className={`w-4 h-4 shrink-0 ${
-                      ticket.status === 'resolved' || ticket.status === 'closed'
+                      ticket.status === 'resolved' || ticket.status === 'cancelled'
                         ? 'text-green-400'
                         : ticket.status === 'open'
                         ? 'text-blue-400'

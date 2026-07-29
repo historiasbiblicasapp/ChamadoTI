@@ -42,7 +42,7 @@ export type Database = {
           ticket_number: number;
           title: string;
           description: string;
-          status: 'open' | 'in_progress' | 'waiting_user' | 'waiting_parts' | 'waiting_supplier' | 'resolved' | 'closed' | 'cancelled';
+          status: 'open' | 'in_progress' | 'waiting_user' | 'waiting_parts' | 'waiting_supplier' | 'resolved' | 'cancelled';
           priority: 'low' | 'medium' | 'high' | 'critical';
           category_id: string | null;
           subcategory: string | null;
@@ -58,9 +58,8 @@ export type Database = {
           created_at: string;
           updated_at: string;
           resolved_at: string | null;
-          closed_at: string | null;
         };
-        Insert: Omit<Database['public']['Tables']['tickets']['Row'], 'id' | 'ticket_number' | 'created_at' | 'updated_at' | 'resolved_at' | 'closed_at'>;
+        Insert: Omit<Database['public']['Tables']['tickets']['Row'], 'id' | 'ticket_number' | 'created_at' | 'updated_at' | 'resolved_at'>;
         Update: Partial<Database['public']['Tables']['tickets']['Insert']>;
       };
       ticket_comments: {

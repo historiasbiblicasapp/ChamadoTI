@@ -7,7 +7,6 @@ export type TicketStatus =
   | 'waiting_parts'
   | 'waiting_supplier'
   | 'resolved'
-  | 'closed'
   | 'cancelled';
 
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
@@ -56,7 +55,6 @@ export interface Ticket {
   created_at: string;
   updated_at: string;
   resolved_at: string | null;
-  closed_at: string | null;
   resolved_by: string | null;
   custom_fields: Record<string, any> | null;
   requester?: Profile;

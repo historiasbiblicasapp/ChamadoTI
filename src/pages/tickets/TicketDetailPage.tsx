@@ -186,11 +186,10 @@ export function TicketDetailPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (newStatus === 'open' && (ticket.status === 'resolved' || ticket.status === 'closed')) {
+      if (newStatus === 'open' && ticket.status === 'resolved') {
         await supabase.from('tickets').update({
           status: newStatus,
           resolved_at: null,
-          closed_at: null,
           resolved_by: null,
           updated_at: new Date().toISOString(),
         }).eq('id', ticket.id);
@@ -471,7 +470,7 @@ export function TicketDetailPage() {
               <div>
                 <SLABar priority={ticket.priority} createdAt={ticket.created_at} status={ticket.status} slaHours={slaHoursMap[ticket.priority]} />
               </div>
-              {(ticket.status === 'resolved' || ticket.status === 'closed') && (
+              {(ticket.status === 'resolved' || ticket.status === 'cancelled') && (
                 <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 space-y-1">
                   <p className="text-xs text-green-400 font-semibold flex items-center gap-1">
                     <span>✅</span> Concluído e Validado por
@@ -545,23 +544,12 @@ export function TicketDetailPage() {
                 </button>
               )}
               {ticket.status === 'resolved' && (
-                <>
-                  <button onClick={() => handleStatusChange('closed')} className="btn-secondary w-full btn-sm">
-                    Fechar Chamado
-                  </button>
-                  <button onClick={() => setReopening(true)} className="btn-secondary w-full btn-sm flex items-center justify-center gap-1">
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    Reabrir Chamado
-                  </button>
-                </>
-              )}
-              {ticket.status === 'closed' && (
                 <button onClick={() => setReopening(true)} className="btn-secondary w-full btn-sm flex items-center justify-center gap-1">
                   <RotateCcw className="w-3.5 h-3.5" />
                   Reabrir Chamado
                 </button>
               )}
-              {ticket.status !== 'cancelled' && ticket.status !== 'closed' && (
+              {ticket.status !== 'cancelled' && ticket.status !== 'resolved' && (
                 <button onClick={() => handleStatusChange('cancelled')} className="btn-danger w-full btn-sm">
                   Cancelar
                 </button>

@@ -11,7 +11,7 @@ interface SLAIndicatorProps {
 }
 
 export function SLAIndicator({ priority, createdAt, status, slaHours: slaHoursProp }: SLAIndicatorProps) {
-  if (status === 'resolved' || status === 'closed' || status === 'cancelled') {
+  if (status === 'resolved' || status === 'cancelled') {
     return (
       <div className="flex items-center gap-1.5 text-xs text-green-400">
         <CheckCircle className="w-3.5 h-3.5" />
@@ -57,7 +57,7 @@ interface SLABarProps {
 }
 
 export function SLABar({ priority, createdAt, status, slaHours: slaHoursProp }: SLABarProps) {
-  if (status === 'resolved' || status === 'closed' || status === 'cancelled') {
+  if (status === 'resolved' || status === 'cancelled') {
     return null;
   }
 

@@ -54,7 +54,6 @@ export const STATUSES = {
   waiting_parts: { label: 'Aguardando Peças', color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
   waiting_supplier: { label: 'Aguardando Fornecedor', color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
   resolved: { label: 'Resolvido', color: 'text-green-400', bgColor: 'bg-green-500/20' },
-  closed: { label: 'Fechado', color: 'text-gray-400', bgColor: 'bg-gray-500/20' },
   cancelled: { label: 'Cancelado', color: 'text-red-400', bgColor: 'bg-red-500/20' },
 } as const;
 

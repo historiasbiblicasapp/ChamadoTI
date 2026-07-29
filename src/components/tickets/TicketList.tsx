@@ -79,7 +79,6 @@ export function TicketList() {
 
         if (batchStatus === 'open') {
           updatePayload.resolved_at = null;
-          updatePayload.closed_at = null;
         }
 
         await supabase.from('tickets').update(updatePayload).eq('id', id);

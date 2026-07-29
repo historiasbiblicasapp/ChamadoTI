@@ -115,16 +115,14 @@ export const api = {
       const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const sla24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
 
-      const [open, inProgress, pending, resolved, closed, total, sla, today, week] = await Promise.all([
+      const [open, inProgress, pending, resolved, total, sla, today, week] = await Promise.all([
         supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
         supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'in_progress'),
         supabase.from('tickets').select('id', { count: 'exact', head: true }).in('status', ['waiting_user', 'waiting_parts', 'waiting_supplier']),
         supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'resolved'),
-        supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'closed'),
         supabase.from('tickets').select('id', { count: 'exact', head: true }),
         supabase.from('tickets').select('id', { count: 'exact', head: true })
           .neq('status', 'resolved')
-          .neq('status', 'closed')
           .neq('status', 'cancelled')
           .lt('created_at', sla24h),
         supabase.from('tickets').select('id', { count: 'exact', head: true }).gte('created_at', todayStart),
@@ -135,7 +133,6 @@ export const api = {
         inProgress: inProgress.count || 0,
         pending: pending.count || 0,
         resolved: resolved.count || 0,
-        closed: closed.count || 0,
         total: total.count || 0,
         slaExpired: sla.count || 0,
         today: today.count || 0,
@@ -212,7 +209,7 @@ export const api = {
     getAvgTimes: async () => {
       const { data, error } = await supabase
         .from('tickets')
-        .select('created_at, resolved_at, closed_at')
+        .select('created_at, resolved_at')
         .not('resolved_at', 'is', null);
       if (error || !data || data.length === 0) {
         return { avgAttendance: 0, avgResolution: 0 };
@@ -253,7 +250,6 @@ export const api = {
           requester:profiles!tickets_requester_id_fkey(full_name)
         `)
         .neq('status', 'resolved')
-        .neq('status', 'closed')
         .neq('status', 'cancelled')
         .order('created_at', { ascending: true })
         .limit(20);
