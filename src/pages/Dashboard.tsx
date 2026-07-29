@@ -316,7 +316,7 @@ export function Dashboard() {
                         {PRIORITIES[ticket.priority as TicketPriority]?.label}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-300 truncate">{ticket.title}</p>
+                     <p className="text-sm text-gray-300 truncate">{cleanTicketTitle(ticket.title)}</p>
                   </div>
                   <span className="text-xs text-gray-500 shrink-0">{timeAgo(ticket.created_at)}</span>
                 </div>

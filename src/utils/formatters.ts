@@ -54,7 +54,7 @@ export function formatTicketNumber(number: number): string {
   return String(number).padStart(6, '0');
 }
 
-const LEGACY_TICKET_PREFIX_RE = /^\[#([a-f0-9]+)\]\s*/i;
+const LEGACY_TICKET_PREFIX_RE = /^\[#?([^\]]+)\]\s*\|?\s*/i;
 
 export function cleanTicketTitle(title: string): string {
   if (!title) return '';
