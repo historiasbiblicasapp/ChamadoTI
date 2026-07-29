@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Loader2, Pencil, Trash2, Check, X, RotateCcw } from 'lucide-react';
 import { useTicket, useTickets } from '../../hooks/useTickets';
-import { formatTicketNumber, formatDate } from '../../utils/formatters';
+import { formatTicketNumber, formatDate, cleanTicketTitle } from '../../utils/formatters';
 import { STATUSES, PRIORITIES, TICKET_CATEGORIES } from '../../utils/constants';
 import { SLABar } from '../../components/tickets/SLAIndicator';
 import { TicketTimeline } from '../../components/tickets/TicketTimeline';
@@ -43,7 +43,7 @@ export function TicketDetailPage() {
     const link = createWhatsAppTicketLink({
       phone: (ticket as any).phone || ticket.requester?.phone || '',
       ticketNumber: ticket.ticket_number,
-      title: ticket.title,
+      title: cleanTicketTitle(ticket.title),
       statusLabel: STATUSES[ticket.status as keyof typeof STATUSES]?.label || ticket.status,
     });
     window.open(link, '_blank');
@@ -270,7 +270,7 @@ export function TicketDetailPage() {
             isLoading={updateTicket.isPending}
             submitLabel="Salvar Alteracoes"
             defaultValues={{
-              title: ticket.title,
+              title: cleanTicketTitle(ticket.title),
               description: ticket.description,
               category_id: ticket.category_id || '',
               priority: ticket.priority,
@@ -307,7 +307,7 @@ export function TicketDetailPage() {
               {STATUSES[ticket.status]?.label}
             </span>
           </div>
-          <p className="text-sm text-gray-500 mt-1">{ticket.title}</p>
+           <p className="text-sm text-gray-500 mt-1">{cleanTicketTitle(ticket.title)}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button

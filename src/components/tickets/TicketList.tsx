@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Filter, ChevronLeft, ChevronRight, CheckSquare, Square, Loader2 } from 'lucide-react';
 import { useTickets } from '../../hooks/useTickets';
-import { formatTicketNumber, formatDate } from '../../utils/formatters';
+import { formatTicketNumber, formatDate, cleanTicketTitle } from '../../utils/formatters';
 import { STATUSES, PRIORITIES, TICKET_CATEGORIES, PERIOD_OPTIONS } from '../../utils/constants';
 import { SLAIndicator } from './SLAIndicator';
 import { showToast } from '../ui/Toaster';
@@ -254,7 +254,7 @@ export function TicketList() {
                       </span>
                     </td>
                     <td className="table-cell cursor-pointer" onClick={() => navigate(`/tickets/${ticket.id}`)}>
-                      <span className="text-sm text-gray-200 line-clamp-1">{ticket.title}</span>
+                       <span className="text-sm text-gray-200 line-clamp-1">{cleanTicketTitle(ticket.title)}</span>
                     </td>
                     <td className="table-cell text-sm text-gray-300 cursor-pointer" onClick={() => navigate(`/tickets/${ticket.id}`)}>
                       {ticket.requester?.full_name || '-'}
@@ -346,7 +346,7 @@ export function TicketList() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-gray-100 line-clamp-2">{ticket.title}</h3>
+                 <h3 className="text-sm font-semibold text-gray-100 line-clamp-2">{cleanTicketTitle(ticket.title)}</h3>
                 <p className="text-xs text-gray-400 mt-1">
                   Solicitante: <span className="text-gray-300">{ticket.requester?.full_name || '-'}</span>
                 </p>

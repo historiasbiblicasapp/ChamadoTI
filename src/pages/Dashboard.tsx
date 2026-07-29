@@ -8,7 +8,7 @@ import { StatCard } from '../components/dashboard/StatCard';
 import { ChartWidget } from '../components/dashboard/ChartWidget';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { SLAIndicator } from '../components/tickets/SLAIndicator';
-import { formatTicketNumber, formatDate, timeAgo } from '../utils/formatters';
+import { formatTicketNumber, formatDate, timeAgo, cleanTicketTitle } from '../utils/formatters';
 import { STATUSES, PRIORITIES } from '../utils/constants';
 import { api } from '../services/api';
 import type { TicketStatus, TicketPriority } from '../types';
@@ -261,7 +261,7 @@ export function Dashboard() {
                     {formatTicketNumber(ticket.ticket_number)}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-200 truncate">{ticket.title}</p>
+                     <p className="text-sm text-gray-200 truncate">{cleanTicketTitle(ticket.title)}</p>
                     <p className="text-xs text-gray-500">{ticket.requester?.full_name || '-'}</p>
                   </div>
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${

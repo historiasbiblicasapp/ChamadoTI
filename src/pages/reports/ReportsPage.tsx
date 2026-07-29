@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTickets, useTicketStats } from '../../hooks/useTickets';
 import { useAssets } from '../../hooks/useAssets';
 import { STATUSES, PRIORITIES, ASSET_STATUS_CONFIG } from '../../utils/constants';
+import { formatDate, cleanTicketTitle } from '../../utils/formatters';
 
 type ReportType = 'tickets' | 'assets';
 type ExportFormat = 'csv' | 'pdf' | 'excel';
@@ -282,8 +283,8 @@ export function ReportsPage() {
                 filteredTickets.slice(0, 20).map((ticket) => (
                   <tr key={ticket.id} className="hover:bg-gray-800/30">
                     <td className="table-cell text-gray-400">{ticket.ticket_number}</td>
-                    <td className="table-cell text-gray-500 text-xs">{ticket.scheduled_date || new Date(ticket.created_at).toLocaleDateString('pt-BR')}</td>
-                    <td className="table-cell text-gray-200 max-w-[200px] truncate">{ticket.title}</td>
+                    <td className="table-cell text-gray-500 text-xs">{ticket.scheduled_date ? formatDate(ticket.scheduled_date) : formatDate(ticket.created_at)}</td>
+                    <td className="table-cell text-gray-200 max-w-[200px] truncate">{cleanTicketTitle(ticket.title)}</td>
                     <td className="table-cell">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${STATUSES[ticket.status]?.bgColor || ''} ${STATUSES[ticket.status]?.color || ''}`}>
                         {STATUSES[ticket.status]?.label || ticket.status}

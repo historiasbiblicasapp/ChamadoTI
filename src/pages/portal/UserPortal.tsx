@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, Send, LogOut, Clock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTickets } from '../../hooks/useTickets';
-import { formatTicketNumber, formatDate } from '../../utils/formatters';
+import { formatTicketNumber, formatDate, cleanTicketTitle } from '../../utils/formatters';
 import { STATUSES, PRIORITIES } from '../../utils/constants';
 import { showToast } from '../../components/ui/Toaster';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
@@ -230,7 +230,7 @@ export function UserPortal() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs text-netvision-400">{formatTicketNumber(ticket.ticket_number)}</span>
-                        <span className="text-sm text-gray-200 truncate">{ticket.title}</span>
+                         <span className="text-sm text-gray-200 truncate">{cleanTicketTitle(ticket.title)}</span>
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className={`text-xs px-1.5 py-0.5 rounded ${STATUSES[ticket.status]?.bgColor || ''} ${STATUSES[ticket.status]?.color || ''}`}>
