@@ -48,7 +48,7 @@ export const api = {
           department:departments(name),
            asset:assets(name, patrimony)
          `)
-         .order('scheduled_date', { ascending: false });
+         .order('created_at', { ascending: false });
 
        if (filters?.status) query = query.eq('status', filters.status);
       if (filters?.priority) query = query.eq('priority', filters.priority);
@@ -238,7 +238,7 @@ export const api = {
           requester:profiles!tickets_requester_id_fkey(full_name),
           category:ticket_categories(name)
         `)
-         .order('scheduled_date', { ascending: false })
+         .order('created_at', { ascending: false })
          .limit(limit);
        if (error) throw error;
        return data as any[];
