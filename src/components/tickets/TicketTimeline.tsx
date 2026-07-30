@@ -40,7 +40,7 @@ export function TicketTimeline({ history }: TicketTimelineProps) {
 
   return (
     <div className="space-y-0">
-      {[...history].reverse().map((entry, index) => {
+      {[...history].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((entry, index) => {
         const Icon = getActionIcon(entry.action);
         return (
           <div key={entry.id} className="flex gap-3">
