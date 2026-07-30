@@ -15,7 +15,7 @@ export function SLAIndicator({ priority, createdAt, status, slaHours: slaHoursPr
     return (
       <div className="flex items-center gap-1.5 text-xs text-green-400">
         <CheckCircle className="w-3.5 h-3.5" />
-        <span>Concluido</span>
+        <span>Resolvido</span>
       </div>
     );
   }
