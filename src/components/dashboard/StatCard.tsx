@@ -7,11 +7,15 @@ interface Props {
   color?: string;
   subtitle?: string;
   loading?: boolean;
+  onClick?: () => void;
 }
 
-export function StatCard({ title, value, icon: Icon, color = 'text-netvision-400', subtitle, loading }: Props) {
+export function StatCard({ title, value, icon: Icon, color = 'text-netvision-400', subtitle, loading, onClick }: Props) {
   return (
-    <div className="card card-hover">
+    <div
+      className={`card card-hover ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{title}</p>

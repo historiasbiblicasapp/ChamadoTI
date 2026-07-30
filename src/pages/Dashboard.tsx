@@ -114,6 +114,7 @@ export function Dashboard() {
           icon={Ticket}
           color="text-blue-400"
           loading={statsLoading}
+          onClick={() => navigate('/tickets?status=open')}
         />
         <StatCard
           title="Em Atendimento"
@@ -121,6 +122,7 @@ export function Dashboard() {
           icon={Clock}
           color="text-yellow-400"
           loading={statsLoading}
+          onClick={() => navigate('/tickets?status=in_progress')}
         />
         <StatCard
           title="Pendentes"
@@ -128,6 +130,7 @@ export function Dashboard() {
           icon={AlertTriangle}
           color="text-orange-400"
           loading={statsLoading}
+          onClick={() => navigate('/tickets?status=pending')}
         />
         <StatCard
           title="Resolvidos"
@@ -135,6 +138,7 @@ export function Dashboard() {
           icon={CheckCircle}
           color="text-green-400"
           loading={statsLoading}
+          onClick={() => navigate('/tickets?status=resolved')}
         />
       </div>
 

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Plus, Filter, ChevronLeft, ChevronRight, CheckSquare, Square, Loader2 } from 'lucide-react';
 import { useTickets } from '../../hooks/useTickets';
 import { formatTicketNumber, formatDate, cleanTicketTitle } from '../../utils/formatters';
@@ -16,15 +16,23 @@ const ITEMS_PER_PAGE = 15;
 export function TicketList() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>(searchParams.get('status') || 'all');
+  const [priorityFilter, setPriorityFilter] = useState<string>(searchParams.get('priority') || 'all');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batchStatus, setBatchStatus] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
   const { tickets, isLoading, error } = useTickets();
   const [slaHoursMap, setSlaHoursMap] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (priorityFilter !== 'all') params.set('priority', priorityFilter);
+    setSearchParams(params, { replace: true });
+  }, [statusFilter, priorityFilter, setSearchParams]);
 
   useEffect(() => {
     api.sla.list().then((rules) => {
