@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase';
+import { calculateSLARemaining } from '../utils/formatters';
+import { SLA_HOURS } from '../utils/constants';
 import type { Ticket, Profile, Asset, Department, TicketCategory, SLARule, KnowledgeArticle, Notification, AuditLog, Setting } from '../types';
 
 export const api = {
@@ -255,6 +257,43 @@ export const api = {
         .limit(20);
       if (error) throw error;
       return data as any[];
+    },
+
+    resolveAllExpired: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: tickets, error } = await supabase
+        .from('tickets')
+        .select('id, priority, created_at, status')
+        .neq('status', 'resolved')
+        .neq('status', 'cancelled');
+      if (error) throw error;
+
+      const now = Date.now();
+      const expiredTickets = (tickets as any[]).filter((t) => {
+        const slaHours = SLA_HOURS[t.priority] || 24;
+        const sla = calculateSLARemaining(t.created_at, slaHours);
+        return sla.isExpired;
+      });
+
+      for (const ticket of expiredTickets) {
+        await supabase.from('tickets').update({
+          status: 'resolved',
+          resolved_at: new Date().toISOString(),
+          resolved_by: user?.id,
+          solution_applied: 'Chamado resolvido em lote - SLA vencido',
+          updated_at: new Date().toISOString(),
+        }).eq('id', ticket.id);
+
+        await supabase.from('ticket_history').insert({
+          ticket_id: ticket.id,
+          user_id: user?.id,
+          action: 'status_changed',
+          old_value: ticket.status,
+          new_value: 'resolved',
+        });
+      }
+
+      return expiredTickets.length;
     },
   },
 

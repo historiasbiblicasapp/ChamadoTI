@@ -1,5 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Ticket, AlertTriangle, CheckCircle, Clock, BarChart3, Users,
   TrendingUp, Calendar, ArrowRight, AlertCircle, Timer
@@ -8,6 +9,7 @@ import { StatCard } from '../components/dashboard/StatCard';
 import { ChartWidget } from '../components/dashboard/ChartWidget';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { SLAIndicator } from '../components/tickets/SLAIndicator';
+import { showToast } from '../components/ui/Toaster';
 import { formatTicketNumber, formatDate, timeAgo, cleanTicketTitle } from '../utils/formatters';
 import { STATUSES, PRIORITIES } from '../utils/constants';
 import { api } from '../services/api';
@@ -25,6 +27,7 @@ import {
 
 export function Dashboard() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: stats, isLoading: statsLoading } = useTicketStats();
   const { data: byMonth, isLoading: monthLoading } = useDashboardByMonth();
   const { data: byCategory, isLoading: catLoading } = useDashboardByCategory();
@@ -34,6 +37,7 @@ export function Dashboard() {
   const { data: recent, isLoading: recentLoading } = useDashboardRecent(8);
   const { data: slaAlerts, isLoading: slaLoading } = useDashboardSlaAlerts();
   const [slaHoursMap, setSlaHoursMap] = useState<Record<string, number>>({});
+  const [resolvingAll, setResolvingAll] = useState(false);
 
   useEffect(() => {
     api.sla.list().then((rules) => {
@@ -66,6 +70,21 @@ export function Dashboard() {
       }),
     }));
   }, [slaAlerts, slaHoursMap]);
+
+  const handleResolveAllExpired = async () => {
+    setResolvingAll(true);
+    try {
+      const count = await api.tickets.resolveAllExpired();
+      showToast('success', 'Chamados Resolvidos', `${count} chamado(s) com SLA vencido foram resolvidos com sucesso.`);
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['ticket-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-sla-alerts'] });
+    } catch {
+      showToast('error', 'Erro', 'Não foi possível resolver os chamados vencidos.');
+    } finally {
+      setResolvingAll(false);
+    }
+  };
 
   if (statsLoading) {
     return <LoadingSpinner text="Carregando dashboard..." />;
@@ -276,6 +295,30 @@ export function Dashboard() {
               {slaAlerts?.length || 0} pendente(s)
             </span>
           </div>
+          {slaAlerts && slaAlerts.length > 0 && (
+            <div className="mb-3">
+              <button
+                onClick={handleResolveAllExpired}
+                disabled={resolvingAll}
+                className="btn-success btn-sm w-full flex items-center justify-center gap-2"
+              >
+                {resolvingAll ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Resolvendo...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Resolver Todos os Vencidos
+                  </>
+                )}
+              </button>
+            </div>
+          )}
           <div className="space-y-2">
             {slaLoading ? (
               <p className="text-sm text-gray-500 text-center py-4">Carregando...</p>
