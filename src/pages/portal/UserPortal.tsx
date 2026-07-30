@@ -222,7 +222,7 @@ export function UserPortal() {
                     <StatusIcon className={`w-4 h-4 shrink-0 ${
                       ticket.status === 'resolved' || ticket.status === 'cancelled'
                         ? 'text-green-400'
-                        : ticket.status === 'open'
+                        : ticket.status === 'open' || ticket.status === 'pending'
                         ? 'text-blue-400'
                         : 'text-yellow-400'
                     }`} />

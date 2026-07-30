@@ -120,7 +120,7 @@ export const api = {
       const [open, inProgress, pending, resolved, total, sla, today, week] = await Promise.all([
         supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
         supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'in_progress'),
-        supabase.from('tickets').select('id', { count: 'exact', head: true }).in('status', ['waiting_user', 'waiting_parts', 'waiting_supplier']),
+        supabase.from('tickets').select('id', { count: 'exact', head: true }).in('status', ['pending', 'waiting_user', 'waiting_parts', 'waiting_supplier']),
         supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'resolved'),
         supabase.from('tickets').select('id', { count: 'exact', head: true }),
         supabase.from('tickets').select('id', { count: 'exact', head: true })

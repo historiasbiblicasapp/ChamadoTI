@@ -186,7 +186,7 @@ export function TicketDetailPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (newStatus === 'open' && ticket.status === 'resolved') {
+      if ((newStatus === 'open' || newStatus === 'pending') && ticket.status === 'resolved') {
         await supabase.from('tickets').update({
           status: newStatus,
           resolved_at: null,
@@ -360,18 +360,18 @@ export function TicketDetailPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-medium text-yellow-400">Tem certeza que deseja reabrir?</h3>
-              <p className="text-xs text-gray-500 mt-1">O chamado {formatTicketNumber(ticket.ticket_number)} sera reaberto e voltara para o status <strong>Em Aberto</strong>.</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setReopening(false)} className="btn-secondary btn-sm flex items-center gap-1">
-                <X className="w-3.5 h-3.5" />
-                Cancelar
-              </button>
-              <button onClick={() => handleStatusChange('open')} className="btn-primary btn-sm flex items-center gap-1">
-                <RotateCcw className="w-3.5 h-3.5" />
-                Reabrir
-              </button>
-            </div>
+               <p className="text-xs text-gray-500 mt-1">O chamado {formatTicketNumber(ticket.ticket_number)} sera reaberto e voltara para o status <strong>Pendente</strong>.</p>
+             </div>
+             <div className="flex items-center gap-2">
+               <button onClick={() => setReopening(false)} className="btn-secondary btn-sm flex items-center gap-1">
+                 <X className="w-3.5 h-3.5" />
+                 Cancelar
+               </button>
+               <button onClick={() => handleStatusChange('pending')} className="btn-primary btn-sm flex items-center gap-1">
+                 <RotateCcw className="w-3.5 h-3.5" />
+                 Reabrir
+               </button>
+             </div>
           </div>
         </div>
       )}
@@ -515,7 +515,7 @@ export function TicketDetailPage() {
           <div className="card">
             <h3 className="text-sm font-medium text-gray-400 mb-4">Acoes</h3>
             <div className="space-y-2">
-              {ticket.status === 'open' && (
+              {(ticket.status === 'open' || ticket.status === 'pending') && (
                 <button onClick={() => handleStatusChange('in_progress')} className="btn-primary w-full btn-sm">
                   Iniciar Atendimento
                 </button>

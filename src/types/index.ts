@@ -2,6 +2,7 @@ export type UserRole = 'admin' | 'analyst' | 'user';
 
 export type TicketStatus =
   | 'open'
+  | 'pending'
   | 'in_progress'
   | 'waiting_user'
   | 'waiting_parts'

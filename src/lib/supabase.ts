@@ -42,7 +42,7 @@ export type Database = {
           ticket_number: number;
           title: string;
           description: string;
-          status: 'open' | 'in_progress' | 'waiting_user' | 'waiting_parts' | 'waiting_supplier' | 'resolved' | 'cancelled';
+          status: 'open' | 'pending' | 'in_progress' | 'waiting_user' | 'waiting_parts' | 'waiting_supplier' | 'resolved' | 'cancelled';
           priority: 'low' | 'medium' | 'high' | 'critical';
           category_id: string | null;
           subcategory: string | null;

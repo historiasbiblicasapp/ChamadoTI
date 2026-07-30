@@ -49,6 +49,7 @@ export const PRIORITIES = {
 
 export const STATUSES = {
   open: { label: 'Aberto', color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  pending: { label: 'Pendente', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
   in_progress: { label: 'Em Atendimento', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
   waiting_user: { label: 'Aguardando Usuário', color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
   waiting_parts: { label: 'Aguardando Peças', color: 'text-orange-400', bgColor: 'bg-orange-500/20' },

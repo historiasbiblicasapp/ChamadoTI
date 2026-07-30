@@ -77,7 +77,7 @@ export function TicketList() {
       const updates = selectedIds.map(async (id) => {
         const updatePayload: any = { status: batchStatus, updated_at: new Date().toISOString() };
 
-        if (batchStatus === 'open') {
+        if (batchStatus === 'open' || batchStatus === 'pending') {
           updatePayload.resolved_at = null;
         }
 
