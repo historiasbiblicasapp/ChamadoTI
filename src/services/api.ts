@@ -46,11 +46,11 @@ export const api = {
           assignee:profiles!tickets_assigned_to_fkey(full_name),
           category:ticket_categories(name, icon),
           department:departments(name),
-          asset:assets(name, patrimony)
-        `)
-        .order('created_at', { ascending: false });
+           asset:assets(name, patrimony)
+         `)
+         .order('scheduled_date', { ascending: false });
 
-      if (filters?.status) query = query.eq('status', filters.status);
+       if (filters?.status) query = query.eq('status', filters.status);
       if (filters?.priority) query = query.eq('priority', filters.priority);
       if (filters?.assigned_to) query = query.eq('assigned_to', filters.assigned_to);
 
@@ -238,13 +238,13 @@ export const api = {
           requester:profiles!tickets_requester_id_fkey(full_name),
           category:ticket_categories(name)
         `)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-      if (error) throw error;
-      return data as any[];
-    },
+         .order('scheduled_date', { ascending: false })
+         .limit(limit);
+       if (error) throw error;
+       return data as any[];
+     },
 
-    getSlaAlerts: async () => {
+     getSlaAlerts: async () => {
       const { data, error } = await supabase
         .from('tickets')
         .select(`

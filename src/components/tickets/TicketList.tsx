@@ -45,7 +45,11 @@ export function TicketList() {
       const matchPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
 
       return matchSearch && matchStatus && matchPriority;
-    }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }).sort((a, b) => {
+      const dateA = a.scheduled_date || a.created_at;
+      const dateB = b.scheduled_date || b.created_at;
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
+    });
   }, [tickets, search, statusFilter, priorityFilter]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
