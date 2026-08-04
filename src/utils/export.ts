@@ -3,6 +3,7 @@ import 'jspdf-autotable';
 import ExcelJS from 'exceljs';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { getRequesterName } from './formatters';
 
 interface ExportColumn {
   header: string;
@@ -135,7 +136,7 @@ export function formatTicketsForExport(tickets: any[]) {
     Status: t.status,
     Prioridade: t.priority,
     Categoria: t.category?.name || '',
-    Solicitante: t.requester?.full_name || '',
+    Solicitante: getRequesterName(t),
     Atendente: t.assignee?.full_name || '',
     Criado: format(new Date(t.created_at), 'dd/MM/yyyy HH:mm'),
     Resolvido: t.resolved_at ? format(new Date(t.resolved_at), 'dd/MM/yyyy HH:mm') : '',

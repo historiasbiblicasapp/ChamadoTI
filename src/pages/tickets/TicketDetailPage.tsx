@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Loader2, Pencil, Trash2, Check, X, RotateCcw } from 'lucide-react';
 import { useTicket, useTickets } from '../../hooks/useTickets';
-import { formatTicketNumber, formatDate, cleanTicketTitle } from '../../utils/formatters';
+import { formatTicketNumber, formatDate, cleanTicketTitle, getRequesterName } from '../../utils/formatters';
 import { STATUSES, PRIORITIES, TICKET_CATEGORIES } from '../../utils/constants';
 import { SLABar } from '../../components/tickets/SLAIndicator';
 import { TicketTimeline } from '../../components/tickets/TicketTimeline';
@@ -453,7 +453,13 @@ export function TicketDetailPage() {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Solicitante</p>
-                <p className="text-sm text-gray-200">{ticket.requester?.full_name || '-'}</p>
+                <p className="text-sm text-gray-200">{getRequesterName(ticket)}</p>
+                {(ticket.requester_phone || ticket.phone) && (
+                  <p className="text-xs text-gray-500 mt-0.5">Telefone: {ticket.requester_phone || ticket.phone}</p>
+                )}
+                {ticket.requester_email && (
+                  <p className="text-xs text-gray-500 mt-0.5">E-mail: {ticket.requester_email}</p>
+                )}
               </div>
               <div>
                 <p className="text-xs text-gray-500">Data de Abertura</p>

@@ -43,11 +43,14 @@ export interface Ticket {
   priority: TicketPriority;
   category_id: string | null;
   subcategory: string | null;
-  requester_id: string;
+  requester_id: string | null;
   assigned_to: string | null;
   department_id: string | null;
   location: string | null;
   phone: string | null;
+  requester_name: string | null;
+  requester_phone: string | null;
+  requester_email: string | null;
   asset_id: string | null;
   root_cause: string | null;
   solution_applied: string | null;

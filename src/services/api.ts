@@ -235,6 +235,7 @@ export const api = {
         .from('tickets')
         .select(`
           id, ticket_number, title, status, priority, created_at,
+          requester_name,
           requester:profiles!tickets_requester_id_fkey(full_name),
           category:ticket_categories(name)
         `)
@@ -249,6 +250,7 @@ export const api = {
         .from('tickets')
         .select(`
           id, ticket_number, title, priority, created_at, status,
+          requester_name,
           requester:profiles!tickets_requester_id_fkey(full_name)
         `)
         .neq('status', 'resolved')

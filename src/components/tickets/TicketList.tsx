@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Plus, Filter, ChevronLeft, ChevronRight, CheckSquare, Square, Loader2 } from 'lucide-react';
 import { useTickets } from '../../hooks/useTickets';
-import { formatTicketNumber, formatDate, cleanTicketTitle } from '../../utils/formatters';
+import { formatTicketNumber, formatDate, cleanTicketTitle, getRequesterName } from '../../utils/formatters';
 import { STATUSES, PRIORITIES, TICKET_CATEGORIES, PERIOD_OPTIONS } from '../../utils/constants';
 import { SLAIndicator } from './SLAIndicator';
 import { showToast } from '../ui/Toaster';
@@ -47,7 +47,8 @@ export function TicketList() {
       const matchSearch = !search ||
         ticket.title.toLowerCase().includes(search.toLowerCase()) ||
         String(ticket.ticket_number).includes(search) ||
-        ticket.requester?.full_name?.toLowerCase().includes(search.toLowerCase());
+        ticket.requester?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+        ticket.requester_name?.toLowerCase().includes(search.toLowerCase());
 
       const matchStatus = statusFilter === 'all' || ticket.status === statusFilter;
       const matchPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
@@ -268,7 +269,7 @@ export function TicketList() {
                        <span className="text-sm text-gray-200 line-clamp-1">{cleanTicketTitle(ticket.title)}</span>
                     </td>
                     <td className="table-cell text-sm text-gray-300 cursor-pointer" onClick={() => navigate(`/tickets/${ticket.id}`)}>
-                      {ticket.requester?.full_name || '-'}
+                      {getRequesterName(ticket)}
                     </td>
                     <td className="table-cell cursor-pointer" onClick={() => navigate(`/tickets/${ticket.id}`)}>
                       {ticket.assignee ? (
@@ -359,7 +360,7 @@ export function TicketList() {
               <div>
                  <h3 className="text-sm font-semibold text-gray-100 line-clamp-2">{cleanTicketTitle(ticket.title)}</h3>
                 <p className="text-xs text-gray-400 mt-1">
-                  Solicitante: <span className="text-gray-300">{ticket.requester?.full_name || '-'}</span>
+                  Solicitante: <span className="text-gray-300">{getRequesterName(ticket)}</span>
                 </p>
                 {ticket.assignee ? (
                   <p className="text-xs text-netvision-400 mt-0.5 flex items-center gap-1">

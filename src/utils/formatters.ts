@@ -82,3 +82,7 @@ export function calculateSLARemaining(createdAt: string, priorityHours: number):
     isExpired: remainingMs <= 0,
   };
 }
+
+export function getRequesterName(ticket: { requester?: { full_name?: string } | null; requester_name?: string | null }): string {
+  return ticket.requester?.full_name || ticket.requester_name || '-';
+}
