@@ -28,6 +28,7 @@ const UsersPage = lazy(() => import('./pages/users/UsersPage').then(m => ({ defa
 const SettingsPage = lazy(() => import('./pages/settings/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const AuditPage = lazy(() => import('./pages/audit/AuditPage').then(m => ({ default: m.AuditPage })));
 const PublicTicketPage = lazy(() => import('./pages/portal/PublicTicketPage').then(m => ({ default: m.PublicTicketPage })));
+const PublicMyTickets = lazy(() => import('./pages/portal/PublicMyTickets').then(m => ({ default: m.PublicMyTickets })));
 const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 import { CookieConsent } from './components/ui/CookieConsent';
 import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
@@ -70,6 +71,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/abrir-chamado" element={<SuspenseWrapper><PublicTicketPage /></SuspenseWrapper>} />
+        <Route path="/meus-chamados" element={<SuspenseWrapper><PublicMyTickets /></SuspenseWrapper>} />
         <Route path="/privacidade" element={<SuspenseWrapper><PrivacyPage /></SuspenseWrapper>} />
 
         {/* User portal - standalone, no sidebar */}

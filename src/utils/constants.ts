@@ -1,22 +1,19 @@
 export const TICKET_CATEGORIES = [
-  { value: 'computer', label: 'Computador', icon: 'Monitor' },
-  { value: 'notebook', label: 'Notebook', icon: 'Laptop' },
-  { value: 'monitor', label: 'Monitor', icon: 'Monitor' },
-  { value: 'printer', label: 'Impressora', icon: 'Printer' },
-  { value: 'network', label: 'Rede', icon: 'Network' },
-  { value: 'internet', label: 'Internet', icon: 'Globe' },
-  { value: 'wifi', label: 'Wi-Fi', icon: 'Wifi' },
-  { value: 'telephony', label: 'Telefonia', icon: 'Phone' },
-  { value: 'windows', label: 'Windows', icon: 'Monitor' },
-  { value: 'office', label: 'Microsoft Office', icon: 'FileText' },
-  { value: 'email', label: 'E-mail', icon: 'Mail' },
-  { value: 'erp', label: 'ERP', icon: 'Database' },
-  { value: 'internal_system', label: 'Sistema Interno', icon: 'AppWindow' },
-  { value: 'hardware', label: 'Hardware', icon: 'Cpu' },
-  { value: 'software', label: 'Software', icon: 'Disc' },
-  { value: 'server', label: 'Servidor', icon: 'Server' },
-  { value: 'backup', label: 'Backup', icon: 'HardDrive' },
+  { value: 'frontend', label: 'Frontend', icon: 'Monitor' },
+  { value: 'backend', label: 'Backend', icon: 'Server' },
+  { value: 'database', label: 'Banco de Dados', icon: 'Database' },
+  { value: 'api', label: 'API', icon: 'GitBranch' },
+  { value: 'mobile', label: 'Mobile', icon: 'Smartphone' },
+  { value: 'ui_ux', label: 'UI/UX', icon: 'Palette' },
+  { value: 'bug', label: 'Bug', icon: 'Bug' },
+  { value: 'feature', label: 'Nova Funcionalidade', icon: 'Plus' },
+  { value: 'refactor', label: 'Refatoração', icon: 'RefreshCw' },
+  { value: 'test', label: 'Testes', icon: 'CheckCircle' },
+  { value: 'devops', label: 'DevOps', icon: 'Deploy' },
   { value: 'security', label: 'Segurança', icon: 'Shield' },
+  { value: 'performance', label: 'Performance', icon: 'Zap' },
+  { value: 'documentation', label: 'Documentação', icon: 'FileText' },
+  { value: 'integration', label: 'Integração', icon: 'Link' },
   { value: 'other', label: 'Outro', icon: 'HelpCircle' },
 ] as const;
 
@@ -48,14 +45,14 @@ export const PRIORITIES = {
 } as const;
 
 export const STATUSES = {
-  open: { label: 'Aberto', color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  open: { label: 'Aberta', color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
   pending: { label: 'Pendente', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
-  in_progress: { label: 'Em Atendimento', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
+  in_progress: { label: 'Em Desenvolvimento', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
   waiting_user: { label: 'Aguardando Usuário', color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
-  waiting_parts: { label: 'Aguardando Peças', color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
-  waiting_supplier: { label: 'Aguardando Fornecedor', color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
-  resolved: { label: 'Resolvido', color: 'text-green-400', bgColor: 'bg-green-500/20' },
-  cancelled: { label: 'Cancelado', color: 'text-red-400', bgColor: 'bg-red-500/20' },
+  waiting_parts: { label: 'Aguardando Revisão', color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' },
+  waiting_supplier: { label: 'Aguardando Deploy', color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
+  resolved: { label: 'Concluída', color: 'text-green-400', bgColor: 'bg-green-500/20' },
+  cancelled: { label: 'Cancelada', color: 'text-red-400', bgColor: 'bg-red-500/20' },
 } as const;
 
 export const SLA_HOURS: Record<string, number> = {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Loader2, Send, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
@@ -20,8 +21,9 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function PublicTicketPage() {
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState<{ ticket_number: number } | null>(null);
+  const [success, setSuccess] = useState<{ ticket_number: number; ticket_id: string } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
@@ -68,7 +70,13 @@ export function PublicTicketPage() {
       });
 
       if (error) throw error;
-      setSuccess({ ticket_number: data.ticket_number });
+      const ticketId = data.id as string;
+      setSuccess({ ticket_number: data.ticket_number, ticket_id: ticketId });
+      const stored = JSON.parse(localStorage.getItem('my_ticket_ids') || '[]');
+      if (!stored.includes(ticketId)) {
+        stored.push(ticketId);
+        localStorage.setItem('my_ticket_ids', JSON.stringify(stored));
+      }
     } catch (err: any) {
       setErrors({ submit: err.message || 'Erro ao abrir chamado' });
     } finally {
@@ -86,18 +94,21 @@ export function PublicTicketPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-100 mb-2">Chamado Aberto!</h1>
           <p className="text-gray-500 mb-2">Seu chamado foi registrado com sucesso.</p>
-          <p className="text-netvision-400 font-mono text-lg mb-6">
+          <p className="text-netvision-400 font-mono text-lg mb-2">
             Numero: #{String(success.ticket_number).padStart(4, '0')}
           </p>
-          <p className="text-xs text-gray-600 mb-6">
-            Guarde este numero para acompanhar seu atendimento.
-          </p>
+          <button
+            onClick={() => navigate(`/tickets/${success.ticket_id}`)}
+            className="btn-primary mb-4"
+          >
+            Ver meu chamado
+          </button>
           <button
             onClick={() => {
               setSuccess(null);
               setForm({ title: '', description: '', priority: 'medium', requester_name: '', requester_phone: '', requester_email: '', department: '', lgpd_consent: false });
             }}
-            className="btn-primary"
+            className="btn-secondary"
           >
             Abrir outro chamado
           </button>
