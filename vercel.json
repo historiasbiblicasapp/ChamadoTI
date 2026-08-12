@@ -1,5 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/(?!.*\\.[a-zA-Z0-9]{1,10}$).*", "destination": "/index.html" }
-  ]
-}
