@@ -54,12 +54,33 @@ export function PublicTrackingPage() {
       const result = await api.tickets.getByPublicToken(token);
       const data = result[0];
       if (!data) {
+        console.log('[PublicTracking] Token not found via RPC:', token);
         setError('Chamado nao encontrado ou link invalido.');
       } else {
+        console.log('[PublicTracking] Ticket loaded via RPC:', data);
         setTicket(data as PublicTicketData);
       }
-    } catch {
-      setError('Erro ao carregar o chamado.');
+    } catch (err: any) {
+      console.error('[PublicTracking] RPC error, trying direct query:', err);
+      try {
+        const { data: directData, error: directError } = await supabase
+          .from('tickets')
+          .select('*')
+          .eq('public_token', token)
+          .eq('public_tracking_enabled', true)
+          .single();
+
+        if (directError || !directData) {
+          console.error('[PublicTracking] Direct query also failed:', directError);
+          setError('Erro ao carregar o chamado. Verifique se a migration do Supabase foi aplicada corretamente.');
+        } else {
+          console.log('[PublicTracking] Ticket loaded via direct query:', directData);
+          setTicket(directData as unknown as PublicTicketData);
+        }
+      } catch (directErr) {
+        console.error('[PublicTracking] Direct query error:', directErr);
+        setError('Erro ao carregar o chamado.');
+      }
     } finally {
       setLoading(false);
     }
