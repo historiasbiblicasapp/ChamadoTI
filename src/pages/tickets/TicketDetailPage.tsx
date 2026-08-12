@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Loader2, Pencil, Trash2, Check, X, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Loader2, Pencil, Trash2, Check, X, RotateCcw, Copy } from 'lucide-react';
 import { useTicket, useTickets } from '../../hooks/useTickets';
 import { formatTicketNumber, formatDate, cleanTicketTitle, getRequesterName } from '../../utils/formatters';
 import { STATUSES, PRIORITIES, TICKET_CATEGORIES } from '../../utils/constants';
@@ -29,6 +29,10 @@ export function TicketDetailPage() {
   const [isSubmittingResolve, setIsSubmittingResolve] = useState(false);
   const [technicians, setTechnicians] = useState<Profile[]>([]);
   const [slaHoursMap, setSlaHoursMap] = useState<Record<string, number>>({});
+  const [trackingToken, setTrackingToken] = useState<string>('');
+  const [trackingCopied, setTrackingCopied] = useState(false);
+  const [isRevoking, setIsRevoking] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   useEffect(() => {
     api.users.list().then((users) => {
@@ -56,6 +60,12 @@ export function TicketDetailPage() {
       setSlaHoursMap(map);
     }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (ticket?.public_token) {
+      setTrackingToken(ticket.public_token);
+    }
+  }, [ticket]);
 
 
   if (isLoading) {
@@ -569,6 +579,72 @@ export function TicketDetailPage() {
               <p className="text-sm text-gray-300">{ticket.root_cause}</p>
             </div>
           )}
+
+          <div className="card">
+            <h3 className="text-sm font-medium text-gray-400 mb-3">Acompanhamento Publico</h3>
+            {trackingToken ? (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Link publico</p>
+                  <p className="text-xs text-gray-400 break-all">{`${window.location.origin}/acompanhar/${trackingToken}`}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/acompanhar/${trackingToken}`); setTrackingCopied(true); setTimeout(() => setTrackingCopied(false), 2000); }}
+                    className="btn-primary btn-sm flex-1 flex items-center justify-center gap-1"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    {trackingCopied ? 'Copiado!' : 'Copiar Link'}
+                  </button>
+                  <button
+                    onClick={() => window.open(`${window.location.origin}/acompanhar/${trackingToken}`, '_blank')}
+                    className="btn-secondary btn-sm flex-1"
+                  >
+                    Abrir
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      setIsRevoking(true);
+                      try { await api.tickets.revokePublicToken(ticket.id); refetch(); } catch {}
+                      setIsRevoking(false);
+                    }}
+                    disabled={isRevoking}
+                    className="btn-danger btn-sm flex-1"
+                  >
+                    {isRevoking ? 'Revogando...' : 'Desativar'}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setIsRegenerating(true);
+                      try { await api.tickets.regeneratePublicToken(ticket.id); refetch(); } catch {}
+                      setIsRegenerating(false);
+                    }}
+                    disabled={isRegenerating}
+                    className="btn-secondary btn-sm flex-1"
+                  >
+                    {isRegenerating ? 'Gerando...' : 'Regenerar Token'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-xs text-gray-500 mb-2">Nenhum token de acompanhamento publico gerado.</p>
+                <button
+                  onClick={async () => {
+                    setIsRegenerating(true);
+                    try { await api.tickets.regeneratePublicToken(ticket.id); refetch(); } catch {}
+                    setIsRegenerating(false);
+                  }}
+                  disabled={isRegenerating}
+                  className="btn-primary btn-sm w-full"
+                >
+                  {isRegenerating ? 'Gerando...' : 'Gerar Link Publico'}
+                </button>
+              </div>
+            )}
+          </div>
 
         </div>
       </div>

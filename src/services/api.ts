@@ -297,6 +297,24 @@ export const api = {
 
       return expiredTickets.length;
     },
+
+    getByPublicToken: async (token: string) => {
+      const { data, error } = await supabase.rpc('get_ticket_by_public_token', { p_token: token });
+      if (error) throw error;
+      return data as any[];
+    },
+
+    revokePublicToken: async (ticketId: string) => {
+      const { data, error } = await supabase.rpc('revoke_public_token', { p_ticket_id: ticketId });
+      if (error) throw error;
+      return data as boolean;
+    },
+
+    regeneratePublicToken: async (ticketId: string) => {
+      const { data, error } = await supabase.rpc('regenerate_public_token', { p_ticket_id: ticketId });
+      if (error) throw error;
+      return data as string;
+    },
   },
 
   // Assets

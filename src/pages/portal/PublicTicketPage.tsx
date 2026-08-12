@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Send, CheckCircle } from 'lucide-react';
+import { Loader2, Send, CheckCircle, Copy, Share2 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { PRIORITIES } from '../../utils/constants';
@@ -23,7 +24,7 @@ type FormData = z.infer<typeof schema>;
 export function PublicTicketPage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState<{ ticket_number: number; ticket_id: string } | null>(null);
+  const [success, setSuccess] = useState<{ ticket_number: number; ticket_id: string; public_token: string } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
@@ -71,7 +72,8 @@ export function PublicTicketPage() {
 
       if (error) throw error;
       const ticketId = data.id as string;
-      setSuccess({ ticket_number: data.ticket_number, ticket_id: ticketId });
+      const publicToken = data.public_token as string;
+      setSuccess({ ticket_number: data.ticket_number, ticket_id: ticketId, public_token: publicToken });
       const stored = JSON.parse(localStorage.getItem('my_ticket_ids') || '[]');
       if (!stored.includes(ticketId)) {
         stored.push(ticketId);
@@ -85,6 +87,26 @@ export function PublicTicketPage() {
   };
 
   if (success) {
+    const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const trackingUrl = `${appUrl}/acompanhar/${success.public_token}`;
+
+    const copyToClipboard = async (text: string, label: string) => {
+      await navigator.clipboard.writeText(text);
+    };
+
+    const shareTicket = async () => {
+      const shareData = {
+        title: `Chamado #${String(success.ticket_number).padStart(4, '0')}`,
+        text: `Acompanhe seu chamado de TI: ${trackingUrl}`,
+        url: trackingUrl,
+      };
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(trackingUrl);
+      }
+    };
+
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-start p-4">
         <ThemeToggle />
@@ -93,22 +115,72 @@ export function PublicTicketPage() {
             <CheckCircle className="w-8 h-8 text-green-400" />
           </div>
           <h1 className="text-2xl font-bold text-gray-100 mb-2">Chamado Aberto!</h1>
-          <p className="text-gray-500 mb-2">Seu chamado foi registrado com sucesso.</p>
-          <p className="text-netvision-400 font-mono text-lg mb-2">
-            Numero: #{String(success.ticket_number).padStart(4, '0')}
-          </p>
-          <button
-            onClick={() => navigate(`/tickets/${success.ticket_id}`)}
-            className="btn-primary mb-4"
-          >
-            Ver meu chamado
-          </button>
+          <p className="text-gray-500 mb-4">Seu chamado foi registrado com sucesso.</p>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-4 text-left space-y-3">
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Numero do chamado</p>
+              <p className="text-netvision-400 font-mono text-lg font-bold">
+                #{String(success.ticket_number).padStart(4, '0')}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Codigo de acompanhamento</p>
+              <p className="text-gray-200 font-mono text-sm font-medium">{success.public_token}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Link de acompanhamento</p>
+              <p className="text-gray-400 text-xs break-all">{trackingUrl}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center mb-4">
+            <div className="bg-white p-3 rounded-xl mb-2">
+              <QRCodeSVG value={trackingUrl} size={160} />
+            </div>
+            <p className="text-xs text-gray-500">Aponte a camera do celular para acompanhar seu chamado</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <button
+              onClick={() => copyToClipboard(trackingUrl, 'Link copiado!')}
+              className="btn-primary flex items-center justify-center gap-2"
+            >
+              <Copy className="w-4 h-4" />
+              Copiar Link
+            </button>
+            <button
+              onClick={() => copyToClipboard(success.public_token, 'Codigo copiado!')}
+              className="btn-secondary flex items-center justify-center gap-2"
+            >
+              <Copy className="w-4 h-4" />
+              Copiar Codigo
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <button
+              onClick={() => window.open(trackingUrl, '_blank')}
+              className="btn-success flex items-center justify-center gap-2"
+            >
+              <Share2 className="w-4 h-4" />
+              Abrir Acompanhamento
+            </button>
+            <button
+              onClick={shareTicket}
+              className="btn-secondary flex items-center justify-center gap-2"
+            >
+              <Share2 className="w-4 h-4" />
+              Compartilhar
+            </button>
+          </div>
+
           <button
             onClick={() => {
               setSuccess(null);
               setForm({ title: '', description: '', priority: 'medium', requester_name: '', requester_phone: '', requester_email: '', department: '', lgpd_consent: false });
             }}
-            className="btn-secondary"
+            className="btn-secondary w-full"
           >
             Abrir outro chamado
           </button>

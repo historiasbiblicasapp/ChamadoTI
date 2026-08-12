@@ -29,6 +29,7 @@ const SettingsPage = lazy(() => import('./pages/settings/SettingsPage').then(m =
 const AuditPage = lazy(() => import('./pages/audit/AuditPage').then(m => ({ default: m.AuditPage })));
 const PublicTicketPage = lazy(() => import('./pages/portal/PublicTicketPage').then(m => ({ default: m.PublicTicketPage })));
 const PublicMyTickets = lazy(() => import('./pages/portal/PublicMyTickets').then(m => ({ default: m.PublicMyTickets })));
+const PublicTrackingPage = lazy(() => import('./pages/portal/PublicTrackingPage').then(m => ({ default: m.PublicTrackingPage })));
 const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 import { CookieConsent } from './components/ui/CookieConsent';
 import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/abrir-chamado" element={<SuspenseWrapper><PublicTicketPage /></SuspenseWrapper>} />
         <Route path="/meus-chamados" element={<SuspenseWrapper><PublicMyTickets /></SuspenseWrapper>} />
+        <Route path="/acompanhar/:token" element={<SuspenseWrapper><PublicTrackingPage /></SuspenseWrapper>} />
         <Route path="/privacidade" element={<SuspenseWrapper><PrivacyPage /></SuspenseWrapper>} />
 
         {/* User portal - standalone, no sidebar */}

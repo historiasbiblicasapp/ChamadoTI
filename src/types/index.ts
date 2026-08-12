@@ -69,6 +69,11 @@ export interface Ticket {
   comments?: TicketComment[];
   files?: TicketFile[];
   history?: TicketHistory[];
+  public_token?: string | null;
+  public_tracking_enabled?: boolean;
+  public_tracking_created_at?: string;
+  public_tracking_last_access?: string;
+  public_tracking_expires_at?: string;
 }
 
 export interface TicketComment {
