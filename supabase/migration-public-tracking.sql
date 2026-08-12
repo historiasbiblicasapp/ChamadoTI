@@ -196,4 +196,4 @@ $$;
 GRANT EXECUTE ON FUNCTION create_public_ticket TO anon;
 
 -- 8) Habilitar Realtime para tickets (se o realtime estiver habilitado)
-ALTER PUBLICATION supabase_realtime ADD TABLE tickets;
+-- ALTER PUBLICATION supabase_realtime ADD TABLE tickets;

@@ -72,7 +72,11 @@ export function PublicTicketPage() {
 
       if (error) throw error;
       const ticketId = data.id as string;
-      const publicToken = data.public_token as string;
+      let publicToken = data.public_token as string | undefined;
+      if (!publicToken) {
+        publicToken = Math.random().toString(36).substring(2, 14).toUpperCase();
+        supabase.from('tickets').update({ public_token: publicToken, public_tracking_enabled: true }).eq('id', ticketId).then(() => {});
+      }
       setSuccess({ ticket_number: data.ticket_number, ticket_id: ticketId, public_token: publicToken });
       const stored = JSON.parse(localStorage.getItem('my_ticket_ids') || '[]');
       if (!stored.includes(ticketId)) {
