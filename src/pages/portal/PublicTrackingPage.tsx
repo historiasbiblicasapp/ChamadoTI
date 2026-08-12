@@ -147,12 +147,14 @@ export function PublicTrackingPage() {
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4">
         <ThemeToggle />
-        <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
+        <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+          <AlertTriangle className="w-6 h-6 text-red-400" />
+        </div>
         <h1 className="text-xl font-bold text-gray-100 mb-2">Acompanhamento Indisponivel</h1>
-        <p className="text-sm text-gray-500 text-center max-w-md">
+        <p className="text-sm text-gray-400 text-center max-w-md mb-6">
           {error || 'Este link nao esta mais disponivel. Entre em contato com o suporte.'}
         </p>
-        <button onClick={() => navigate('/abrir-chamado')} className="btn-primary mt-6">
+        <button onClick={() => navigate('/abrir-chamado')} className="btn-primary">
           Abrir Chamado
         </button>
       </div>
@@ -161,7 +163,7 @@ export function PublicTrackingPage() {
 
   const statusInfo = STATUS_MAP[ticket.status] || { label: ticket.status, color: 'bg-gray-500', emoji: '⚪' };
   const priorityInfo = PRIORITIES[ticket.priority as keyof typeof PRIORITIES] || { label: ticket.priority, color: 'text-gray-400', bgColor: 'bg-gray-500/20' };
-  const trackingUrl = `${window.location.origin}/acompanhar/${token}`;
+  const trackingUrl = typeof window !== 'undefined' ? `${window.location.origin}/acompanhar/${token}` : '';
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -169,7 +171,9 @@ export function PublicTrackingPage() {
       <header className="bg-gray-900 border-b border-gray-800 px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.jpeg" alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
+            <div className="w-8 h-8 rounded-lg bg-netvision-500 flex items-center justify-center">
+              <span className="text-white font-bold text-xs">TI</span>
+            </div>
             <div>
               <h1 className="text-sm font-bold text-gray-100">ChamadosTiRaitz</h1>
               <p className="text-xs text-gray-500">Acompanhamento Publico</p>
@@ -240,31 +244,33 @@ export function PublicTrackingPage() {
           </div>
         </div>
 
-        <div className="card">
-          <h3 className="text-sm font-medium text-gray-400 mb-3">Compartilhar</h3>
-          <div className="flex flex-col items-center gap-3">
-            <div className="bg-white p-3 rounded-xl">
-              <QRCodeSVG value={trackingUrl} size={180} />
-            </div>
-            <p className="text-xs text-gray-500">Aponte a camera do celular para acompanhar</p>
-            <div className="flex gap-2 w-full">
-              <button
-                onClick={() => copyToClipboard(trackingUrl)}
-                className="btn-primary flex-1 flex items-center justify-center gap-2"
-              >
-                <Copy className="w-4 h-4" />
-                {copied ? 'Copiado!' : 'Copiar Link'}
-              </button>
-              <button
-                onClick={shareTicket}
-                className="btn-secondary flex-1 flex items-center justify-center gap-2"
-              >
-                <Share2 className="w-4 h-4" />
-                Compartilhar
-              </button>
+        {trackingUrl && (
+          <div className="card">
+            <h3 className="text-sm font-medium text-gray-400 mb-3">Compartilhar</h3>
+            <div className="flex flex-col items-center gap-3">
+              <div className="bg-white p-3 rounded-xl">
+                <QRCodeSVG value={trackingUrl} size={180} />
+              </div>
+              <p className="text-xs text-gray-500">Aponte a camera do celular para acompanhar</p>
+              <div className="flex gap-2 w-full">
+                <button
+                  onClick={() => copyToClipboard(trackingUrl)}
+                  className="btn-primary flex-1 flex items-center justify-center gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  {copied ? 'Copiado!' : 'Copiar Link'}
+                </button>
+                <button
+                  onClick={shareTicket}
+                  className="btn-secondary flex-1 flex items-center justify-center gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Compartilhar
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
