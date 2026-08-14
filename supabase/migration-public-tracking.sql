@@ -166,20 +166,22 @@ DECLARE
   v_ticket_number INT;
   v_public_token TEXT;
   v_result JSON;
+  v_analyst_id UUID;
 BEGIN
   IF NOT p_lgpd_consent THEN
     RAISE EXCEPTION 'Consentimento LGPD obrigatorio';
   END IF;
 
   v_public_token := public.generate_public_token();
+  SELECT public.get_profile_id_by_email('wellington.s@galvanizacaoraitz.com.br') INTO v_analyst_id;
 
   INSERT INTO tickets (
     title, description, priority, requester_name, requester_phone,
-    requester_email, department, status, scheduled_date, public_token
+    requester_email, department, status, scheduled_date, public_token, assigned_to
   ) VALUES (
     p_title, p_description, p_priority::ticket_priority,
     p_requester_name, p_requester_phone, p_requester_email,
-    p_department, 'open', CURRENT_DATE, v_public_token
+    p_department, 'open', CURRENT_DATE, v_public_token, v_analyst_id
   )
   RETURNING id, ticket_number INTO v_ticket_id, v_ticket_number;
 

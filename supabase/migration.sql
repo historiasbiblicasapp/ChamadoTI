@@ -332,6 +332,24 @@ CREATE TRIGGER on_comment_added
   FOR EACH ROW EXECUTE FUNCTION log_comment_added();
 
 -- ============================================
+-- RPC: Get profile ID by email
+-- ============================================
+
+CREATE OR REPLACE FUNCTION public.get_profile_id_by_email(p_email TEXT)
+RETURNS UUID
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT p.id FROM profiles p
+  JOIN auth.users u ON u.id = p.id
+  WHERE u.email = p_email
+  LIMIT 1;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_profile_id_by_email(TEXT) TO anon, authenticated;
+
+-- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
 

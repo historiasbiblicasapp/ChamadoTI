@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { calculateSLARemaining } from '../utils/formatters';
-import { SLA_HOURS } from '../utils/constants';
+import { SLA_HOURS, DEFAULT_ANALYST_EMAIL } from '../utils/constants';
 import type { Ticket, Profile, Asset, Department, TicketCategory, SLARule, KnowledgeArticle, Notification, AuditLog, Setting } from '../types';
 
 export const api = {
@@ -79,9 +79,11 @@ export const api = {
     },
     create: async (ticket: Partial<Ticket>) => {
       const { data: { user } } = await supabase.auth.getUser();
+      const { data: analystId } = await supabase
+        .rpc('get_profile_id_by_email', { p_email: DEFAULT_ANALYST_EMAIL });
       const { data, error } = await supabase
         .from('tickets')
-        .insert({ ...ticket, requester_id: user?.id })
+        .insert({ ...ticket, requester_id: user?.id, assigned_to: analystId })
         .select()
         .single();
       if (error) throw error;

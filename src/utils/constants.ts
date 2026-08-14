@@ -1,20 +1,23 @@
 export const TICKET_CATEGORIES = [
-  { value: 'frontend', label: 'Frontend', icon: 'Monitor' },
-  { value: 'backend', label: 'Backend', icon: 'Server' },
-  { value: 'database', label: 'Banco de Dados', icon: 'Database' },
-  { value: 'api', label: 'API', icon: 'GitBranch' },
-  { value: 'mobile', label: 'Mobile', icon: 'Smartphone' },
-  { value: 'ui_ux', label: 'UI/UX', icon: 'Palette' },
-  { value: 'bug', label: 'Bug', icon: 'Bug' },
-  { value: 'feature', label: 'Nova Funcionalidade', icon: 'Plus' },
-  { value: 'refactor', label: 'Refatoração', icon: 'RefreshCw' },
-  { value: 'test', label: 'Testes', icon: 'CheckCircle' },
-  { value: 'devops', label: 'DevOps', icon: 'Deploy' },
-  { value: 'security', label: 'Segurança', icon: 'Shield' },
-  { value: 'performance', label: 'Performance', icon: 'Zap' },
-  { value: 'documentation', label: 'Documentação', icon: 'FileText' },
-  { value: 'integration', label: 'Integração', icon: 'Link' },
-  { value: 'other', label: 'Outro', icon: 'HelpCircle' },
+  { value: 'computador', label: 'Computador', icon: 'Monitor' },
+  { value: 'notebook', label: 'Notebook', icon: 'Laptop' },
+  { value: 'monitor', label: 'Monitor', icon: 'Monitor' },
+  { value: 'impressora', label: 'Impressora', icon: 'Printer' },
+  { value: 'rede', label: 'Rede', icon: 'Network' },
+  { value: 'internet', label: 'Internet', icon: 'Globe' },
+  { value: 'wifi', label: 'Wi-Fi', icon: 'Wifi' },
+  { value: 'telefonia', label: 'Telefonia', icon: 'Phone' },
+  { value: 'windows', label: 'Windows', icon: 'Monitor' },
+  { value: 'microsoft_office', label: 'Microsoft Office', icon: 'FileText' },
+  { value: 'email', label: 'E-mail', icon: 'Mail' },
+  { value: 'erp', label: 'ERP', icon: 'Database' },
+  { value: 'sistema_interno', label: 'Sistema Interno', icon: 'AppWindow' },
+  { value: 'hardware', label: 'Hardware', icon: 'Cpu' },
+  { value: 'software', label: 'Software', icon: 'Disc' },
+  { value: 'servidor', label: 'Servidor', icon: 'Server' },
+  { value: 'backup', label: 'Backup', icon: 'HardDrive' },
+  { value: 'seguranca', label: 'Seguranca', icon: 'Shield' },
+  { value: 'outro', label: 'Outro', icon: 'HelpCircle' },
 ] as const;
 
 export const PRIORITIES = {
@@ -102,3 +105,5 @@ export const KNOWLEDGE_CATEGORIES = [
   { value: 'network', label: 'Rede' },
   { value: 'other', label: 'Outro' },
 ] as const;
+
+export const DEFAULT_ANALYST_EMAIL = 'wellington.s@galvanizacaoraitz.com.br';
