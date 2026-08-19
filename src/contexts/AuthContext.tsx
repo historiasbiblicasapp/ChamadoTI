@@ -49,15 +49,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
       if (!isMounted) return;
 
+      if (!currentSession) {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        if (isMounted) setIsLoading(false);
+        return;
+      }
+
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
       if (currentSession?.user) {
-        fetchProfile(currentSession.user.id).then((p) => {
-          if (isMounted) setProfile(p);
-        });
+        const p = await fetchProfile(currentSession.user.id);
+        if (isMounted) setProfile(p);
       }
 
+      if (isMounted) setIsLoading(false);
+    }).catch((err) => {
+      console.error('Erro ao obter sessão:', err);
+      setSession(null);
+      setUser(null);
+      setProfile(null);
       if (isMounted) setIsLoading(false);
     });
 
@@ -65,6 +78,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       if (!isMounted) return;
+
+      if (event === 'SIGNED_OUT' || !newSession) {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        if (isMounted) setIsLoading(false);
+        return;
+      }
 
       setSession(newSession);
       setUser(newSession?.user ?? null);

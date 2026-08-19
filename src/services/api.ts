@@ -3,6 +3,11 @@ import { calculateSLARemaining } from '../utils/formatters';
 import { SLA_HOURS, DEFAULT_ANALYST_EMAIL } from '../utils/constants';
 import type { Ticket, Profile, Asset, Department, TicketCategory, SLARule, KnowledgeArticle, Notification, AuditLog, Setting } from '../types';
 
+async function getCurrentUser() {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
 export const api = {
   // Auth
   auth: {
@@ -16,7 +21,9 @@ export const api = {
       if (error) throw error;
     },
     resetPassword: async (email: string) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
       if (error) throw error;
     },
     getUser: async () => {
@@ -78,7 +85,7 @@ export const api = {
       return data as Ticket;
     },
     create: async (ticket: Partial<Ticket>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUser();
       let analystId: string | null = null;
       try {
         const { data } = await supabase
@@ -115,7 +122,7 @@ export const api = {
       if (error) throw error;
     },
     addComment: async (ticketId: string, content: string, isInternal = false) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUser();
       const { data, error } = await supabase
         .from('ticket_comments')
         .insert({ ticket_id: ticketId, author_id: user?.id, content, is_internal: isInternal })
@@ -275,7 +282,7 @@ export const api = {
     },
 
     resolveAllExpired: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUser();
       const { data: tickets, error } = await supabase
         .from('tickets')
         .select('id, priority, created_at, status')
@@ -464,7 +471,7 @@ export const api = {
       return data as KnowledgeArticle;
     },
     create: async (article: Partial<KnowledgeArticle> & { tags?: string[] }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUser();
       const { data, error } = await supabase
         .from('knowledge_base')
         .insert({ ...article, author_id: user?.id })
@@ -495,11 +502,12 @@ export const api = {
   // Notifications
   notifications: {
     list: async (limit = 50) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUser();
+      if (!user?.id) return [];
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(limit);
       if (error) throw error;
@@ -513,11 +521,12 @@ export const api = {
       if (error) throw error;
     },
     markAllAsRead: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUser();
+      if (!user?.id) return;
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .eq('read', false);
       if (error) throw error;
     },
@@ -559,8 +568,9 @@ export const api = {
       if (error) throw error;
 
       // Log audit
+      const auditUser = await getCurrentUser();
       await supabase.from('audit_logs').insert({
-        user_id: (await supabase.auth.getUser()).data.user?.id,
+        user_id: auditUser?.id,
         action: 'user_role_changed',
         entity_type: 'profile',
         entity_id: id,

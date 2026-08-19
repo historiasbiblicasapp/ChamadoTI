@@ -525,6 +525,8 @@ CREATE POLICY "Users can upload files to accessible tickets" ON ticket_files FOR
 -- History policies
 CREATE POLICY "Analysts can view ticket history" ON ticket_history FOR SELECT
   USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'analyst')));
+CREATE POLICY "System can create ticket history" ON ticket_history FOR INSERT
+  WITH CHECK (true);
 
 -- Assets policies
 CREATE POLICY "Users can view all assets" ON assets FOR SELECT USING (true);
