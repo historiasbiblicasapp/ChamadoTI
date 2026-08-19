@@ -79,8 +79,14 @@ export const api = {
     },
     create: async (ticket: Partial<Ticket>) => {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: analystId } = await supabase
-        .rpc('get_profile_id_by_email', { p_email: DEFAULT_ANALYST_EMAIL });
+      let analystId: string | null = null;
+      try {
+        const { data } = await supabase
+          .rpc('get_profile_id_by_email', { p_email: DEFAULT_ANALYST_EMAIL });
+        analystId = data;
+      } catch (e) {
+        console.warn('RPC get_profile_id_by_email não disponível, pulando analista padrão');
+      }
       const { data, error } = await supabase
         .from('tickets')
         .insert({ ...ticket, requester_id: user?.id, assigned_to: analystId })

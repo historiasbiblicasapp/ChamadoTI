@@ -17,7 +17,7 @@ END $$;
 
 DO $$ BEGIN
   CREATE TYPE ticket_status AS ENUM (
-    'open', 'in_progress', 'waiting_user', 'waiting_parts',
+    'open', 'pending', 'in_progress', 'waiting_user', 'waiting_parts',
     'waiting_supplier', 'resolved', 'closed', 'cancelled'
   );
 EXCEPTION WHEN duplicate_object THEN NULL;

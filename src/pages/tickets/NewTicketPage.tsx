@@ -17,6 +17,7 @@ export function NewTicketPage() {
       if (cat) {
         const { data: catRow } = await supabase.from('ticket_categories').select('id').eq('name', cat.label).single();
         if (catRow) categoryId = catRow.id;
+        else categoryId = null;
       }
 
       await createTicket.mutateAsync({

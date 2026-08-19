@@ -90,12 +90,16 @@ export function TicketDetailPage() {
   const handleEdit = async (data: any) => {
     try {
       const cat = TICKET_CATEGORIES.find((c) => c.value === data.category_id);
-      const catId = cat ? (await supabase.from('ticket_categories').select('id').eq('name', cat.label).single()).data?.id : data.category_id;
+      let catId: string | null = null;
+      if (cat) {
+        const { data: catRow } = await supabase.from('ticket_categories').select('id').eq('name', cat.label).single();
+        catId = catRow?.id || null;
+      }
 
       const updates: any = {
         title: data.title,
         description: data.description,
-        category_id: catId || data.category_id,
+        category_id: catId,
         priority: data.priority,
         location: data.location,
       };
