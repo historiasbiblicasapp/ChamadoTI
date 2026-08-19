@@ -16,6 +16,8 @@ export const TICKET_CATEGORIES = [
   { value: 'erp', label: 'ERP', icon: 'Database' },
   { value: 'sistema_interno', label: 'Sistema Interno', icon: 'AppWindow' },
   { value: 'hardware', label: 'Hardware', icon: 'Cpu' },
+  { value: 'manutencao', label: 'Manutenção', icon: 'Wrench' },
+  { value: 'teste_hardware', label: 'Teste de Hardware', icon: 'Cpu' },
   { value: 'software', label: 'Software', icon: 'Disc' },
   { value: 'servidor', label: 'Servidor', icon: 'Server' },
   { value: 'backup', label: 'Backup', icon: 'HardDrive' },

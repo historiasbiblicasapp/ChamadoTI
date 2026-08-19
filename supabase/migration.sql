@@ -501,6 +501,8 @@ INSERT INTO ticket_categories (name, icon) VALUES
   ('ERP', 'Database'),
   ('Sistema Interno', 'AppWindow'),
   ('Hardware', 'Cpu'),
+  ('Manutencao', 'Wrench'),
+  ('Teste de Hardware', 'Cpu'),
   ('Software', 'Disc'),
   ('Servidor', 'Server'),
   ('Backup', 'HardDrive'),
