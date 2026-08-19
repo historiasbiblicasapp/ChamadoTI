@@ -38,6 +38,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE order_status AS ENUM ('open', 'in_progress', 'completed', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 -- ============================================
 -- TABLES
 -- ============================================
@@ -195,6 +200,64 @@ CREATE TABLE IF NOT EXISTS notifications (
   reference_id UUID,
   reference_type TEXT,
   read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Labor Roles (cargos para mão de obra)
+CREATE TABLE IF NOT EXISTS labor_roles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  reference_code TEXT UNIQUE NOT NULL,
+  hourly_rate NUMERIC(10, 2) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Work Orders (ordens de serviço)
+CREATE TABLE IF NOT EXISTS work_orders (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_number SERIAL UNIQUE,
+  title TEXT NOT NULL,
+  description TEXT,
+  status order_status DEFAULT 'open',
+  ticket_id UUID REFERENCES tickets(id) ON DELETE SET NULL,
+  assigned_to UUID REFERENCES profiles(id),
+  resources_value NUMERIC(10, 2) DEFAULT 0,
+  labor_value NUMERIC(10, 2) DEFAULT 0,
+  transportation_value NUMERIC(10, 2) DEFAULT 0,
+  transportation_type TEXT,
+  tax_percentage NUMERIC(5, 2) DEFAULT 0,
+  tax_value NUMERIC(10, 2) DEFAULT 0,
+  discount NUMERIC(10, 2) DEFAULT 0,
+  subtotal NUMERIC(10, 2) DEFAULT 0,
+  total NUMERIC(10, 2) DEFAULT 0,
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Order Resources (recursos/materiais da ordem)
+CREATE TABLE IF NOT EXISTS order_resources (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_id UUID REFERENCES work_orders(id) ON DELETE CASCADE,
+  item TEXT NOT NULL,
+  quantity NUMERIC(10, 2) DEFAULT 1,
+  unit_value NUMERIC(10, 2) NOT NULL,
+  total_value NUMERIC(10, 2) GENERATED ALWAYS AS (quantity * unit_value) STORED,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Order Labor (mão de obra da ordem)
+CREATE TABLE IF NOT EXISTS order_labor (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_id UUID REFERENCES work_orders(id) ON DELETE CASCADE,
+  labor_role_id UUID REFERENCES labor_roles(id),
+  profile_id UUID REFERENCES profiles(id),
+  hours NUMERIC(10, 2) NOT NULL,
+  people_count INT DEFAULT 1,
+  unit_value NUMERIC(10, 2) NOT NULL,
+  total_value NUMERIC(10, 2) GENERATED ALWAYS AS (hours * people_count * unit_value) STORED,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -396,6 +459,47 @@ CREATE POLICY "Analysts and admins can update tickets" ON tickets FOR UPDATE
 CREATE POLICY "Users can update own open tickets" ON tickets FOR UPDATE
   USING (requester_id = auth.uid() AND status IN ('open', 'waiting_user'));
 
+-- Work Orders policies
+CREATE POLICY "Admins and analysts can view work orders" ON work_orders FOR SELECT
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'analyst')));
+CREATE POLICY "Admins can manage work orders" ON work_orders FOR ALL
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "Analysts can create work orders" ON work_orders FOR INSERT
+  WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'analyst')));
+
+-- Labor Roles policies
+CREATE POLICY "Everyone can view labor roles" ON labor_roles FOR SELECT USING (true);
+CREATE POLICY "Admins can manage labor roles" ON labor_roles FOR ALL
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+
+-- Order Resources policies
+CREATE POLICY "Admins and analysts can view order resources" ON order_resources FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM work_orders wo
+    WHERE wo.id = order_resources.order_id
+    AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'analyst'))
+  ));
+CREATE POLICY "Admins can manage order resources" ON order_resources FOR ALL
+  USING (EXISTS (
+    SELECT 1 FROM work_orders wo
+    WHERE wo.id = order_resources.order_id
+    AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  ));
+
+-- Order Labor policies
+CREATE POLICY "Admins and analysts can view order labor" ON order_labor FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM work_orders wo
+    WHERE wo.id = order_labor.order_id
+    AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'analyst'))
+  ));
+CREATE POLICY "Admins can manage order labor" ON order_labor FOR ALL
+  USING (EXISTS (
+    SELECT 1 FROM work_orders wo
+    WHERE wo.id = order_labor.order_id
+    AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  ));
+
 -- Comments policies
 CREATE POLICY "Users can view comments on accessible tickets" ON ticket_comments FOR SELECT
   USING (EXISTS (
@@ -516,8 +620,26 @@ INSERT INTO settings (key, value) VALUES
   ('company_phone', '""'),
   ('company_email', '""'),
   ('theme', '"dark"'),
-  ('language', '"pt-BR"')
+  ('language', '"pt-BR"'),
+  ('tax_percentage', '16')
 ON CONFLICT (key) DO NOTHING;
+
+-- Default labor roles
+INSERT INTO labor_roles (name, reference_code, hourly_rate, description) VALUES
+  ('Elétrica', 'EL', 35.00, 'Serviços elétricos básicos'),
+  ('Elétrica II', 'EL II', 55.00, 'Serviços elétricos avançados'),
+  ('Mecânica', 'ME', 33.00, 'Serviços mecânicos básicos'),
+  ('Mecânica II', 'ME II', 53.00, 'Serviços mecânicos avançados'),
+  ('Instrumentação', 'IN', 40.00, 'Serviços de instrumentação'),
+  ('Instrumentação II', 'IN II', 60.00, 'Serviços de instrumentação avançados'),
+  ('Automação', 'AU', 60.00, 'Serviços de automação'),
+  ('Automação II', 'AU II', 80.00, 'Serviços de automação avançados'),
+  ('Transporte', 'TR', 45.00, 'Serviços de transporte'),
+  ('Administrativo', 'AD', 28.00, 'Serviços administrativos'),
+  ('Serviços Gerais', 'SG', 33.00, 'Serviços gerais'),
+  ('Serviços Gerais II', 'SG II', 38.00, 'Serviços gerais avançados'),
+  ('Civil', 'CI', 45.00, 'Serviços civis')
+ON CONFLICT (reference_code) DO NOTHING;
 
 -- ============================================
 -- STORAGE BUCKET

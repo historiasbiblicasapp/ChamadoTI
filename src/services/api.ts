@@ -87,12 +87,17 @@ export const api = {
       } catch (e) {
         console.warn('RPC get_profile_id_by_email não disponível, pulando analista padrão');
       }
+      const payload = { ...ticket, requester_id: user?.id, assigned_to: analystId };
+      console.log('Creating ticket with payload:', payload);
       const { data, error } = await supabase
         .from('tickets')
-        .insert({ ...ticket, requester_id: user?.id, assigned_to: analystId })
+        .insert(payload)
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao criar ticket:', error);
+        throw error;
+      }
       return data as Ticket;
     },
     update: async (id: string, updates: Partial<Ticket>) => {

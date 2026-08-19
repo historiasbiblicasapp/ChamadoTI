@@ -15,9 +15,19 @@ export function NewTicketPage() {
       let categoryId = data.category_id;
       const cat = TICKET_CATEGORIES.find((c) => c.value === data.category_id);
       if (cat) {
-        const { data: catRow } = await supabase.from('ticket_categories').select('id').eq('name', cat.label).single();
-        if (catRow) categoryId = catRow.id;
-        else categoryId = null;
+        const { data: catRow, error: catError } = await supabase
+          .from('ticket_categories')
+          .select('id')
+          .eq('name', cat.label)
+          .single();
+        if (catError) {
+          console.warn('Falha ao buscar categoria por nome:', catError);
+          categoryId = null;
+        } else if (catRow) {
+          categoryId = catRow.id;
+        } else {
+          categoryId = null;
+        }
       }
 
       await createTicket.mutateAsync({
@@ -31,6 +41,7 @@ export function NewTicketPage() {
       showToast('success', 'Chamado aberto', 'Seu chamado foi registrado com sucesso');
       navigate('/tickets');
     } catch (error: any) {
+      console.error('Erro ao abrir chamado:', error);
       showToast('error', 'Erro', error?.message || 'Nao foi possivel abrir o chamado');
     }
   };
